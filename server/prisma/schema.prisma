@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String   @id @default(uuid()) @map("id")
+  first_name    String   @map("first_name")
+  last_name     String   @map("last_name")
+  email_id      String   @unique @map("email_id")
+  phone_number  String   @map("phone_number")
+  password      String   @map("password")
+  role          ROLE     @map("role")
+  profile_image String?  @map("profile_image")
+  created_at    DateTime @default(now()) @map("created_at")
+  updated_at    DateTime @updatedAt @map("updated_at")
+
+  agencies   Agency[]
+  tripImages TripImages[]
+  bookings   Booking[]
+  reviews    Review[]
+
+  @@map("user")
+}
+
+model Agency {
+  id           String   @id @default(uuid()) @map("id")
+  name         String   @unique @map("name")
+  slug         String?  @map("slug")
+  description  String?  @map("description")
+  logo         String?  @map("logo")
+  email_id     String   @unique @map("email_id")
+  phone_number String   @map("phone_number")
+  website      String?  @map("website")
+  address      String   @map("address")
+  city         String   @map("city")
+  state        String   @map("state")
+  country      String   @map("country")
+  is_active    Boolean  @map("is_active")
+  password     String   @map("password")
+  created_at   DateTime @default(now()) @map("created_at")
+  updated_at   DateTime @updatedAt @map("updated_at")
+
+  owner    User   @relation(fields: [owner_id], references: [id])
+  owner_id String @map("owner_id")
+
+  trips Trip[]
+
+  @@map("agency")
+}
+
+model Trip {
+  id                String   @id @default(uuid()) @map("id")
+  title             String   @map("title")
+  slug              String?  @map("slug")
+  short_description String   @map("short_description")
+  description       String   @map("description")
+  destination       String   @map("destination")
+  meeting_point     String   @map("meeting_point")
+  duration_days     Int      @map("duration_days")
+  duration_nights   Int      @map("duration_nights")
+  price             Decimal  @map("price")
+  discount_price    Decimal  @map("discount_price")
+  total_seats       Int      @map("total_seats")
+  available_seats   Int      @map("available_seats")
+  start_date        DateTime @map("start_date")
+  end_date          DateTime @map("end_date")
+  booking_deadline  DateTime @map("booking_deadline")
+  average_rating    Decimal  @map("average_rating")
+  total_reviews     Int      @map("total_reviews")
+  is_active         Boolean  @map("is_active")
+  created_at        DateTime @default(now()) @map("created_at")
+  updated_at        DateTime @updatedAt @map("updated_at")
+
+  agency    Agency @relation(fields: [agency_id], references: [id])
+  agency_id String @map("agency_id")
+
+  tripImages  TripImages[]
+  itineraries Itinerary[]
+  bookings    Booking[]
+  reviews     Review[]
+
+  @@map("trip")
+}
+
+model TripImages {
+  id           String   @id @default(uuid()) @map("id")
+  image_url    String   @map("image_url")
+  is_thumbnail Boolean  @map("is_thumbnail")
+  created_at   DateTime @default(now()) @map("created_at")
+  updated_at   DateTime @updatedAt @map("updated_at")
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String @map("user_id")
+
+  trip    Trip   @relation(fields: [trip_id], references: [id])
+  trip_id String @map("trip_id")
+
+  @@map("trip_images")
+}
+
+model Itinerary {
+  id          String   @id @default(uuid()) @map("id")
+  day_number  Int      @map("day_number")
+  title       String   @map("title")
+  description String?  @map("description")
+  created_at  DateTime @default(now()) @map("created_at")
+  updated_at  DateTime @updatedAt @map("updated_at")
+
+  trip    Trip   @relation(fields: [trip_id], references: [id])
+  trip_id String @map("trip_id")
+
+  @@map("itinerary")
+}
+
+model Booking {
+  id                 String         @id @default(uuid()) @map("id")
+  number_of_adults   Int            @map("number_of_adults")
+  number_of_children Int?           @map("number_of_children")
+  total_amount       Int            @map("total_amount")
+  booking_status     BOOKING_STATUS @map("booking_status")
+  payment_status     PAYMENT_STATUS @map("payment_status")
+  special_request    String?        @map("special_request")
+  booked_at          DateTime       @map("booked_at")
+  created_at         DateTime       @default(now()) @map("created_at")
+  updated_at         DateTime       @updatedAt @map("updated_at")
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String @map("user_id")
+
+  trip    Trip   @relation(fields: [trip_id], references: [id])
+  trip_id String @map("trip_id")
+
+  reviews      Review[]
+  cancellation Cancellation?
+
+  @@map("booking")
+}
+
+model Cancellation {
+  id                  String              @id @default(uuid()) @map("id")
+  status              CANCELLATION_STATUS @map("status")
+  payment_status      PAYMENT_STATUS      @map("payment_status")
+  cancelled_by        ROLE                @map("cancelled_by")
+  cancellation_reason String              @map("cancellation_reason")
+  cancelled_at        DateTime            @map("cancelled_at")
+  refund_amount       Decimal?            @map("refund_amount")
+  refund_processed_at DateTime?           @map("refund_processed_at")
+
+  booking    Booking @relation(fields: [booking_id], references: [id])
+  booking_id String  @unique
+
+  @@map("cancellation")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @map("id")
+  rating     Decimal? @map("rating")
+  title      String?  @map("title")
+  comment    String?  @map("comment")
+  created_at DateTime @default(now()) @map("created_at")
+  updated_at DateTime @updatedAt @map("updated_at")
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String @map("user_id")
+
+  trip    Trip   @relation(fields: [trip_id], references: [id])
+  trip_id String @map("trip_id")
+
+  booking    Booking @relation(fields: [booking_id], references: [id])
+  booking_id String  @map("booking_id")
+
+  @@map("review")
+}
+
+enum ROLE {
+  ADMIN
+  AGENCY_USER
+  USER
+}
+
+enum BOOKING_STATUS {
+  PENDING
+  CONFIRMED
+  CANCEL_REQUESTED
+  CANCELLED
+  COMPLETED
+  REJECTED
+}
+
+enum PAYMENT_STATUS {
+  PENDING
+  PARTIAL_PAID
+  PAID
+  PARTIAL_REFUNDED
+  REFUNDED
+}
+
+enum CANCELLATION_STATUS {
+  PENDING
+  APPROVED
+  REJECTED
+}

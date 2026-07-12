@@ -1,0 +1,68 @@
+export interface GetTripInterface {
+	id: string,
+	title: string,
+	slug: string,
+	short_description: string,
+	description: string,
+	destination: string,
+	meeting_point: string,
+	duration_days: number,
+	duration_nights: number,
+	price: number,
+	discount_price: number,
+	total_seats: number,
+	available_seats: number,
+	start_date: string | Date,
+	end_date: string | Date,
+	booking_deadline: string | Date,
+	average_rating: number,
+	total_reviews: number,
+	is_active: boolean,
+	created_at: string,
+	updated_at: string,
+	agency_id: string,
+}
+
+export interface CreateTripInterface {
+	title: string,
+	slug?: string,
+	short_description: string,
+	description: string,
+	destination: string,
+	meeting_point: string,
+	duration_days: number,
+	duration_nights: number,
+	price: number,
+	discount_price: number,
+	total_seats: number,
+	start_date: string | Date,
+	end_date: string | Date,
+	booking_deadline: string | Date,
+	is_active: boolean,
+	agency_id: string,
+}
+
+export interface UpdateTripInterface {
+	title?: string,
+	slug?: string,
+	short_description?: string,
+	description?: string,
+	destination?: string,
+	meeting_point?: string,
+	duration_days?: number,
+	duration_nights?: number,
+	price?: number,
+	discount_price?: number,
+	total_seats?: number,
+	start_date?: string | Date,
+	end_date?: string | Date,
+	booking_deadline?: string | Date,
+	is_active?: boolean,
+	agency_id?: string,
+}
+
+export interface GetTripParams {
+	agency_id?: string,
+	trip_id?: string,
+	is_active?: string
+}
