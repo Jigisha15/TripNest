@@ -1,6 +1,6 @@
 export const Footer = () => {
 	return (
-		<div className="">
+		<div className="w-full text-center">
 			Footer
 		</div>
 	)

@@ -1,8 +1,8 @@
 import { useState, type Dispatch, type SetStateAction } from "react"
-import type { GetItineraryInterface } from "../../interfaces/itinerary.interface"
+import type { GetItineraryInterface } from "../../../interfaces/itinerary.interface"
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../../ui/sheet"
 
 interface ItineraryTableInterface {
 	data: GetItineraryInterface[],

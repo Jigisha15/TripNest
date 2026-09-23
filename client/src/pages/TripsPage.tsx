@@ -73,19 +73,6 @@ export const TripsPage = () => {
 					)}
 				</Card>
 
-				{/*CREATE TRIP SHEET
-				<Sheet open={openCreate} onOpenChange={setOpenCreate}>
-					<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
-						<SheetHeader>
-							<SheetTitle>Create trip</SheetTitle>
-						</SheetHeader>
-
-						<CreateTrip
-							agency_id={agency_id}
-							setOpenCreate={setOpenCreate}
-						/>
-					</SheetContent>
-				</Sheet>*/}
 			</div>
 		)
 	}
@@ -118,16 +105,18 @@ export const TripsPage = () => {
 					</BreadcrumbList>
 				</Breadcrumb>
 
-
-				<Button
-					className="mr-35 cursor-pointer"
-					variant="outline"
-					onClick={() => {
-						setOpenCreate(true)
-					}}
-				>
-					<Plus />Create Trip
-				</Button>
+				{/*  if the user is an AGENCY_USER only then show this button */}
+				{user?.role === "AGENCY_USER" && (
+					<Button
+						className="mr-35 cursor-pointer"
+						variant="outline"
+						onClick={() => {
+							setOpenCreate(true)
+						}}
+					>
+						<Plus />Create Trip
+					</Button>
+				)}
 			</div>
 
 			<div className="mx-auto max-w-6xl px-4 py-10 flex items-center justify-center gap-5 flex-col">

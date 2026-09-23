@@ -13,8 +13,8 @@ export const createItinerary = async (data: CreateItineraryInterface) => {
 	return response.data
 }
 
-export const updateItinerary = async (itinerary_id: string, data: Partial<UpdateItineraryInterface>) => {
-	const response = await api.patch(`/itinerary/update/${itinerary_id}`, data)
+export const updateItinerary = async (trip_id: string, data: Partial<UpdateItineraryInterface>) => {
+	const response = await api.patch(`/itinerary/update/${trip_id}`, data)
 	return response.data
 }
 

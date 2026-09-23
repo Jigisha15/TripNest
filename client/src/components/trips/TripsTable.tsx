@@ -5,7 +5,7 @@ import type { RootState } from "../../app/store"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { Badge } from "../ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
-import { Button } from "../ui/button"
+import { Button, buttonVariants } from "../ui/button"
 import { Eye, Pencil, Plus, Trash2, X } from "lucide-react"
 import { useState, type Dispatch, type SetStateAction } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet"
@@ -14,12 +14,14 @@ import { Link } from "react-router-dom"
 
 interface TripsTableInterface {
 	data: GetTripInterface[],
-	agency_name: string
+	agency_name: string,
 }
 
 //export const columns: ColumnDef<GetTripInterface>[] = [
 export const getColumns = (
 	role: string,
+	user_id: string,
+	agency_name: string,
 	setSelectedTrip: Dispatch<SetStateAction<GetTripInterface | null>>,
 	setOpen: Dispatch<SetStateAction<boolean>>,
 	setUpdateFlag: Dispatch<SetStateAction<boolean>>,
@@ -35,6 +37,12 @@ export const getColumns = (
 			header: 'Actions',
 			cell: ({ row }) => {
 				const trip = row.original;
+
+				const today = new Date();
+
+				const bookingDeadlinePased = trip?.booking_deadline ? today.getTime() > new Date(trip.booking_deadline).getTime() : false;
+
+				const cancellationDeadlinePassed = trip?.start_date ? today.getTime() > new Date(trip.start_date).getTime() : false;
 
 				return (
 					<div className="flex gap-2 justify-start">
@@ -66,16 +74,40 @@ export const getColumns = (
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<Button
-													className="cursor-pointer border p-2 hover:bg-gray-200"
-													variant="outline"
-													id={trip.id}
-												>
-													<Plus />
-												</Button>
+												<span>
+													<Link
+														to={
+															bookingDeadlinePased
+																? "#"
+																: `/book-trip/${trip.agency_id}/${agency_name}/${trip.id}/${user_id}`
+														}
+														aria-disabled={bookingDeadlinePased}
+														tabIndex={bookingDeadlinePased ? -1 : undefined}
+														onClick={(e) => {
+															if (bookingDeadlinePased) {
+																e.preventDefault();
+															}
+														}}
+														className={buttonVariants({
+															variant: "outline",
+															className: `h-9 w-9 p-2 ${bookingDeadlinePased
+																? "opacity-50 cursor-not-allowed"
+																: "cursor-pointer"
+																}
+															`,
+														})}
+													>
+														<Plus className="h-4 w-4" />
+													</Link>
+												</span>
 											</TooltipTrigger>
+
 											<TooltipContent>
-												<p>Book Trip</p>
+												<p>
+													{bookingDeadlinePased
+														? "Booking deadline has passed"
+														: "Book Trip"}
+												</p>
 											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
@@ -84,16 +116,40 @@ export const getColumns = (
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<Button
-													className="cursor-pointer border p-2 hover:bg-gray-200"
-													variant="outline"
-													id={trip.id}
-												>
-													<X />
-												</Button>
+												<span>
+													<Link
+														to={
+															cancellationDeadlinePassed
+																? "#"
+																: `/book-trip/${trip.agency_id}/${agency_name}/${trip.id}/${user_id}` // change here for the cancellation
+														}
+														aria-disabled={cancellationDeadlinePassed}
+														tabIndex={cancellationDeadlinePassed ? -1 : undefined}
+														onClick={(e) => {
+															if (cancellationDeadlinePassed) {
+																e.preventDefault();
+															}
+														}}
+														className={buttonVariants({
+															variant: "outline",
+															className: `h-9 w-9 p-2 ${cancellationDeadlinePassed
+																? "opacity-50 cursor-not-allowed"
+																: "cursor-pointer"
+																}
+        													`,
+														})}
+													>
+														<X className="h-4 w-4" />
+													</Link>
+												</span>
 											</TooltipTrigger>
+
 											<TooltipContent>
-												<p>Cancel Booking</p>
+												<p>
+													{cancellationDeadlinePassed
+														? "Cancellation deadline has passed"
+														: "Cancel Trip"}
+												</p>
 											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
@@ -218,12 +274,22 @@ export const getColumns = (
 				return (
 					<div className="">
 						{/*{user.available_seats}*/}
-						<Link
-							to={`/itinerary/${trip.agency_id}/${trip.id}`}
-							className="cursor-pointer hover:text-blue-700"
-						>
-							Create Itinerary
-						</Link>
+						{/* if AGENCY_USER then show this, else show view */}
+						{role === "AGENCY_USER" ? (
+							<Link
+								to={`/itinerary/${trip.agency_id}/${agency_name}/${trip.id}/${trip.title}`}
+								className="cursor-pointer text-blue-600 hover:text-blue-800"
+							>
+								Itinerary
+							</Link>
+						) : (
+							<Link
+								to={`/itinerary/${trip.agency_id}/${agency_name}/${trip.id}/${trip.title}`}
+								className="cursor-pointer text-blue-600 hover:text-blue-800"
+							>
+								Itinerary
+							</Link>
+						)}
 					</div>
 				)
 			}
@@ -241,7 +307,8 @@ export const TripsTable = ({ data, agency_name }: TripsTableInterface) => {
 	const [updateFlag, setUpdateFlag] = useState(false);
 	const [deleteFlag, setDeleteFlag] = useState(false);
 
-	const columns = getColumns(user?.role ?? "", setSelectedTrip, setOpen, setUpdateFlag, setDeleteFlag);
+	const columns = getColumns(user?.role ?? "", user?.id ?? "", agency_name, setSelectedTrip, setOpen, setUpdateFlag, setDeleteFlag);
+
 
 	//const trips = data.data;
 

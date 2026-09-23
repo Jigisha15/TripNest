@@ -105,30 +105,58 @@ model TripImages {
 }
 
 model Itinerary {
-  id          String   @id @default(uuid()) @map("id")
-  day_number  Int      @map("day_number")
-  title       String   @map("title")
-  description String?  @map("description")
-  created_at  DateTime @default(now()) @map("created_at")
-  updated_at  DateTime @updatedAt @map("updated_at")
+  id String @id @default(uuid()) @map("id")
 
-  trip    Trip   @relation(fields: [trip_id], references: [id])
+  type ItineraryType @map("type")
+
+  day_number   Int? @map("day_number")
+  night_number Int? @map("night_number")
+
+  title       String  @map("title")
+  description String? @map("description")
+
+  created_at DateTime @default(now()) @map("created_at")
+  updated_at DateTime @updatedAt @map("updated_at")
+
+  trip    Trip   @relation(fields: [trip_id], references: [id], onDelete: Cascade)
   trip_id String @map("trip_id")
 
+  items ItineraryItem[]
+
+  @@index([trip_id])
+  @@index([trip_id, type, day_number])
+  @@index([trip_id, type, night_number])
   @@map("itinerary")
 }
 
+model ItineraryItem {
+  id String @id @default(uuid()) @map("id")
+
+  title       String  @map("title")
+  description String? @map("description")
+
+  sequence Int @default(0) @map("sequence")
+
+  itinerary    Itinerary @relation(fields: [itinerary_id], references: [id], onDelete: Cascade)
+  itinerary_id String    @map("itinerary_id")
+
+  created_at DateTime @default(now()) @map("created_at")
+  updated_at DateTime @updatedAt @map("updated_at")
+
+  @@index([itinerary_id])
+  @@index([itinerary_id, sequence])
+  @@map("itinerary_item")
+}
+
 model Booking {
-  id                 String         @id @default(uuid()) @map("id")
-  number_of_adults   Int            @map("number_of_adults")
-  number_of_children Int?           @map("number_of_children")
-  total_amount       Int            @map("total_amount")
-  booking_status     BOOKING_STATUS @map("booking_status")
-  payment_status     PAYMENT_STATUS @map("payment_status")
-  special_request    String?        @map("special_request")
-  booked_at          DateTime       @map("booked_at")
-  created_at         DateTime       @default(now()) @map("created_at")
-  updated_at         DateTime       @updatedAt @map("updated_at")
+  id              String         @id @default(uuid()) @map("id")
+  total_amount    Decimal        @map("total_amount")
+  booking_status  BOOKING_STATUS @map("booking_status")
+  payment_status  PAYMENT_STATUS @map("payment_status")
+  special_request String?        @map("special_request")
+  booked_at       DateTime       @default(now()) @map("booked_at")
+  created_at      DateTime       @default(now()) @map("created_at")
+  updated_at      DateTime       @updatedAt @map("updated_at")
 
   user    User   @relation(fields: [user_id], references: [id])
   user_id String @map("user_id")
@@ -139,6 +167,7 @@ model Booking {
   reviews      Review[]
   cancellation Cancellation?
 
+  @@unique([user_id, trip_id])
   @@map("booking")
 }
 
@@ -205,4 +234,9 @@ enum CANCELLATION_STATUS {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum ItineraryType {
+  DAY
+  NIGHT
 }

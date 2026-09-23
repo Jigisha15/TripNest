@@ -29,10 +29,10 @@ export const useUpdateItinerary = () => {
 	const queryClient = useQueryClient()
 
 	return useMutation({
-		mutationFn: ({ itinerary_id, updateData }: {
-			itinerary_id: string,
+		mutationFn: ({ trip_id, updateData }: {
+			trip_id: string,
 			updateData: Partial<UpdateItineraryInterface>
-		}) => updateItinerary(itinerary_id, updateData),
+		}) => updateItinerary(trip_id, updateData),
 		onSuccess: () => {
 			queryClient.invalidateQueries({
 				queryKey: ["itinerary"]

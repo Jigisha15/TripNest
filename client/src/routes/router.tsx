@@ -11,6 +11,8 @@ import { AgencyPage } from "../pages/AgencyPage";
 import { TripsPage } from "../pages/TripsPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import { ItineraryPage } from "../pages/ItineraryPage";
+import { BookTripPage } from "../pages/BookTripPage";
+import { Ip } from "../pages/Ip";
 
 export const router = createBrowserRouter([
 	{
@@ -55,9 +57,17 @@ export const router = createBrowserRouter([
 						element: <TripsPage />,
 					},
 					{
-						path: "/itinerary/:agency_id/:trip_id",
-						element: <ItineraryPage />
+						path: "/book-trip/:agency_id/:agency_name/:trip_id/:user_id",
+						element: <BookTripPage />
+					},
+					{
+						path: "/itinerary/:agency_id/:agency_name/:trip_id/:trip_name",
+						element: <Ip />
 					}
+					//{
+					//	path: "/itinerary/:agency_id/:agency_name/:trip_id",
+					//	element: <ItineraryPage />
+					//}
 				],
 			},
 			{
