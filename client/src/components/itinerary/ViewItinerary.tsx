@@ -1,4 +1,4 @@
-import type { GetItineraryInterface, UpdateItineraryInterface } from "../../interfaces/itinerary.interface"
+import type { GetItineraryInterface } from "../../interfaces/itinerary.interface"
 import type { GetTripInterface } from "../../interfaces/trips.interface";
 import { formatDate } from "../../utils/formateDate";
 import { TripDetailCard } from "./reusables/TripDetailCard";
@@ -6,9 +6,6 @@ import { ItinerarySection } from "./reusables/ItinerarySection";
 import { ItineraryHeader } from "./reusables/ItineraryHeader";
 import { ItineraryFooter } from "./reusables/ItineraryFooter";
 import { useState } from "react";
-import { useDeleteItinerary } from "../../api/itinerary/itinerary-mutation";
-import toast from "react-hot-toast";
-
 interface ViewItineraryPageInterface {
 	data: GetItineraryInterface[],
 	trip: GetTripInterface,
@@ -41,8 +38,6 @@ export const ViewItinerary = ({ data, trip, agency_id, agency_name, user }: View
 			value: date,
 		},
 	];
-
-	//const { mutation: updateItineraryMutation, isLoading, error } = updateItinerary()
 
 	return (
 		<div className="mx-auto w-full bg-white p-8" id="itinerary-pdf">

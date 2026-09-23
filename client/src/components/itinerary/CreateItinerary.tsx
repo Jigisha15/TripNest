@@ -1,311 +1,335 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useCreateItinerary, useUpdateItinerary } from "../../api/itinerary/itinerary-mutation";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
-// --------------------------------------------------
-// TYPES
-// --------------------------------------------------
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Plus, Trash2 } from "lucide-react";
+import { useCreateItinerary, useUpdateItinerary } from "../../api/itinerary/itinerary-mutation";
+import { Spinner } from "../ui/spinner";
 
 interface ItineraryItem {
 	id?: string;
 	title: string;
-	description?: string | null;
+	description: string;
 }
 
-interface ItinerarySection {
+interface DaySection {
 	id?: string;
-	type: "DAY" | "NIGHT";
-	day_number?: number | null;
-	night_number?: number | null;
+	type: "DAY";
+	day_number: number;
 	title: string;
-	description?: string | null;
+	description: string;
 	items: ItineraryItem[];
 }
 
-interface CreateItineraryPageInterface {
-	agency_id: string;
-	agency_name: string;
-	trip_id: string;
-	openCreate: boolean;
-	setOpenCreate: React.Dispatch<React.SetStateAction<boolean>>;
-	numberOfDays: number;
-	numberOfNights: number;
-
-	// UPDATE MODE
-	isUpdate?: boolean;
-	existingItinerary?: ItinerarySection[];
+interface NightSection {
+	id?: string;
+	type: "NIGHT";
+	night_number: number;
+	title: string;
+	description: string;
+	items: ItineraryItem[];
 }
 
-// --------------------------------------------------
-// EMPTY SECTION
-// --------------------------------------------------
+//id?: string;
+type ItinerarySection = DaySection | NightSection;
 
-const createEmptyDay = (dayNumber: number): ItinerarySection => ({
-	type: "DAY",
-	day_number: dayNumber,
-	title: "",
-	description: "",
-	items: [
-		{
-			title: "",
-			description: "",
-		},
-	],
-});
+type SectionChanges = {
+	title?: string;
+	description?: string;
+};
 
-const createEmptyNight = (nightNumber: number): ItinerarySection => ({
-	type: "NIGHT",
-	night_number: nightNumber,
-	title: "",
-	description: "",
-	items: [
-		{
-			title: "",
-			description: "",
-		},
-	],
-});
-
-// --------------------------------------------------
-// COMPONENT
-// --------------------------------------------------
+interface CreateItineraryPageInterface {
+	trip_id: string;
+	duration_days: number;
+	duration_nights: number;
+	setOpenCreate?: React.Dispatch<React.SetStateAction<boolean>>;
+	setOpenUpdate?: React.Dispatch<React.SetStateAction<boolean>>;
+	mode: "CREATE" | "UPDATE";
+	initialData?: ItinerarySection[];
+}
 
 export const CreateItinerary = ({
-	agency_id,
-	agency_name,
 	trip_id,
-	trip_name,
-	openCreate,
+	duration_days,
+	duration_nights,
 	setOpenCreate,
-	numberOfDays,
-	numberOfNights,
-	isUpdate = false,
-	existingItinerary,
+	setOpenUpdate,
+	mode,
+	initialData,
 }: CreateItineraryPageInterface) => {
-	const navigate = useNavigate();
 
-	// --------------------------------------------------
-	// STATE
-	// --------------------------------------------------
+	// initial data - state
+	const [formData, setFormData] = useState<{
+		trip_id: string;
+		itineraries: ItinerarySection[];
+	}>({
+		trip_id,
 
-	const [itinerary, setItinerary] = useState<ItinerarySection[]>(
-		isUpdate && existingItinerary
-			? existingItinerary
-			: [createEmptyDay(1)]
-	);
+		itineraries:
+			mode === "UPDATE" && initialData
+				? initialData
+				: [
+					{
+						type: "DAY",
+						day_number: 1,
+						title: "",
+						description: "",
+						items: [
+							{
+								title: "",
+								description: "",
+							},
+						],
+					},
 
-	// --------------------------------------------------
-	// LOAD EXISTING DATA IN UPDATE MODE
-	// --------------------------------------------------
+					{
+						type: "NIGHT",
+						night_number: 1,
+						title: "",
+						description: "",
+						items: [
+							{
+								title: "",
+								description: "",
+							},
+						],
+					},
+				],
+	});
 
-	useEffect(() => {
-		if (isUpdate && existingItinerary) {
-			setItinerary(existingItinerary);
-		}
+	const { mutateAsync: createItineraryMutation, isPending: isCreating, } = useCreateItinerary();
 
-		if (!isUpdate) {
-			setItinerary([createEmptyDay(1)]);
-		}
-	}, [isUpdate, existingItinerary]);
+	const { mutateAsync: updateItineraryMutation, isPending: isUpdating, } = useUpdateItinerary();
 
-	// --------------------------------------------------
-	// MUTATIONS
-	// --------------------------------------------------
+	// create empty day initially
+	const createEmptyDay = (dayNumber: number): DaySection => ({
+		type: "DAY",
+		day_number: dayNumber,
+		title: "",
+		description: "",
+		items: [
+			{
+				title: "",
+				description: "",
+			},
+		],
+	});
 
-	const {
-		mutateAsync: createItineraryMutation,
-		isPending: createLoading,
-	} = useCreateItinerary();
+	// create empty night initially
+	const createEmptyNight = (nightNumber: number): NightSection => ({
+		type: "NIGHT",
+		night_number: nightNumber,
+		title: "",
+		description: "",
+		items: [
+			{
+				title: "",
+				description: "",
+			},
+		],
+	});
 
-	const {
-		mutateAsync: updateItineraryMutation,
-		isPending: updateLoading,
-	} = useUpdateItinerary();
-
-	const isPending = createLoading || updateLoading;
-
-	// --------------------------------------------------
-	// RESET FORM
-	// --------------------------------------------------
-
-	const resetForm = () => {
-		setItinerary([createEmptyDay(1)]);
-		setOpenCreate(false);
-	};
-
-	// --------------------------------------------------
-	// GET NEXT DAY NUMBER
-	// --------------------------------------------------
-
+	// get next day number without exceeding max number
 	const getNextDayNumber = () => {
-		const dayNumbers = itinerary
-			.filter((section) => section.type === "DAY")
-			.map((section) => section.day_number || 0);
+		const dayNumbers = formData.itineraries
+			.filter(
+				(section): section is DaySection =>
+					section.type === "DAY"
+			)
+			.map((section) => section.day_number);
 
 		return dayNumbers.length > 0
 			? Math.max(...dayNumbers) + 1
 			: 1;
 	};
 
-	// --------------------------------------------------
-	// GET NEXT NIGHT NUMBER
-	// --------------------------------------------------
-
+	// get next night number without exceeding max number
 	const getNextNightNumber = () => {
-		const nightNumbers = itinerary
-			.filter((section) => section.type === "NIGHT")
-			.map((section) => section.night_number || 0);
+		const nightNumbers = formData.itineraries
+			.filter(
+				(section): section is NightSection =>
+					section.type === "NIGHT"
+			)
+			.map((section) => section.night_number);
 
 		return nightNumbers.length > 0
 			? Math.max(...nightNumbers) + 1
 			: 1;
 	};
 
-	// --------------------------------------------------
-	// ADD DAY
-	// --------------------------------------------------
-
+	// add day
 	const addDay = () => {
+		console.log("formData : ", duration_days)
+		const currentDays = formData.itineraries.filter(
+			(section) => section.type === "DAY"
+		).length;
+
+		if (currentDays >= duration_days) {
+			toast.error(
+				`You can only add ${duration_days} day(s) for this trip.`
+			);
+
+			return;
+		}
+
 		const nextDay = getNextDayNumber();
 
-		setItinerary((prev) => [
+		setFormData((prev) => ({
 			...prev,
-			createEmptyDay(nextDay),
-		]);
+
+			itineraries: [
+				...prev.itineraries,
+				createEmptyDay(nextDay),
+			],
+		}));
 	};
 
-	// --------------------------------------------------
-	// ADD NIGHT
-	// --------------------------------------------------
-
+	// add night
 	const addNight = () => {
+		const currentNights = formData.itineraries.filter(
+			(section) => section.type === "NIGHT"
+		).length;
+
+		if (currentNights >= duration_nights) {
+			toast.error(
+				`You can only add ${duration_nights} night(s) for this trip.`
+			);
+
+			return;
+		}
+
 		const nextNight = getNextNightNumber();
 
-		setItinerary((prev) => [
+		setFormData((prev) => ({
 			...prev,
-			createEmptyNight(nextNight),
-		]);
+
+			itineraries: [
+				...prev.itineraries,
+				createEmptyNight(nextNight),
+			],
+		}));
 	};
 
-	// --------------------------------------------------
-	// REMOVE SECTION
-	// --------------------------------------------------
+	// remove day/night
+	const removeSection = (sectionIndex: number) => {
+		setFormData((prev) => ({
+			...prev,
 
-	const removeSection = (index: number) => {
-		setItinerary((prev) =>
-			prev.filter((_, sectionIndex) => sectionIndex !== index)
-		);
+			itineraries: prev.itineraries.filter(
+				(_, index) => index !== sectionIndex
+			),
+		}));
 	};
 
-	// --------------------------------------------------
-	// UPDATE SECTION
-	// --------------------------------------------------
+	// change section
+	const handleSectionChange = (index: number, changes: SectionChanges) => {
+		setFormData((prev) => ({
+			...prev,
 
-	const handleSectionChange = (
-		index: number,
-		changes: Partial<ItinerarySection>
-	) => {
-		setItinerary((prev) =>
-			prev.map((section, sectionIndex) =>
-				sectionIndex === index
-					? {
-						...section,
-						...changes,
-					}
-					: section
-			)
-		);
+			itineraries: prev.itineraries.map(
+				(section, sectionIndex) =>
+					sectionIndex === index
+						? {
+							...section,
+							...changes,
+						}
+						: section
+			),
+		}));
 	};
 
-	// --------------------------------------------------
-	// ADD ITEM
-	// --------------------------------------------------
-
+	// add inner item
 	const addItem = (sectionIndex: number) => {
-		setItinerary((prev) =>
-			prev.map((section, index) => {
-				if (index !== sectionIndex) {
-					return section;
-				}
+		setFormData((prev) => ({
+			...prev,
 
-				return {
-					...section,
-					items: [
-						...section.items,
-						{
-							title: "",
-							description: "",
-						},
-					],
-				};
-			})
-		);
+			itineraries: prev.itineraries.map(
+				(section, index) => {
+					if (index !== sectionIndex) {
+						return section;
+					}
+
+					return {
+						...section,
+
+						items: [
+							...section.items,
+
+							{
+								title: "",
+								description: "",
+							},
+						],
+					};
+				}
+			),
+		}));
 	};
 
-	// --------------------------------------------------
-	// REMOVE ITEM
-	// --------------------------------------------------
+	// remove inner item
+	const removeItem = (sectionIndex: number, itemIndex: number) => {
+		setFormData((prev) => ({
+			...prev,
 
-	const removeItem = (
-		sectionIndex: number,
-		itemIndex: number
-	) => {
-		setItinerary((prev) =>
-			prev.map((section, index) => {
-				if (index !== sectionIndex) {
-					return section;
+			itineraries: prev.itineraries.map(
+				(section, index) => {
+					if (index !== sectionIndex) {
+						return section;
+					}
+
+					return {
+						...section,
+
+						items: section.items.filter(
+							(_, index) =>
+								index !== itemIndex
+						),
+					};
 				}
-
-				return {
-					...section,
-					items: section.items.filter(
-						(_, index) => index !== itemIndex
-					),
-				};
-			})
-		);
+			),
+		}));
 	};
 
-	// --------------------------------------------------
-	// UPDATE ITEM
-	// --------------------------------------------------
-
+	// change a particular item
 	const handleItemChange = (
 		sectionIndex: number,
 		itemIndex: number,
 		field: keyof ItineraryItem,
 		value: string
 	) => {
-		setItinerary((prev) =>
-			prev.map((section, index) => {
-				if (index !== sectionIndex) {
-					return section;
+		setFormData((prev) => ({
+			...prev,
+
+			itineraries: prev.itineraries.map(
+				(section, index) => {
+					if (index !== sectionIndex) {
+						return section;
+					}
+
+					return {
+						...section,
+
+						items: section.items.map(
+							(item, index) =>
+								index === itemIndex
+									? {
+										...item,
+										[field]: value,
+									}
+									: item
+						),
+					};
 				}
-
-				return {
-					...section,
-
-					items: section.items.map(
-						(item, index) =>
-							index === itemIndex
-								? {
-									...item,
-									[field]: value,
-								}
-								: item
-					),
-				};
-			})
-		);
+			),
+		}));
 	};
 
-	// --------------------------------------------------
-	// VALIDATION
-	// --------------------------------------------------
-
+	// validate itinerary
 	const validateItinerary = () => {
-		if (itinerary.length === 0) {
+
+		if (formData.itineraries.length === 0) {
 			toast.error(
 				"Please add at least one day or night."
 			);
@@ -313,36 +337,64 @@ export const CreateItinerary = ({
 			return false;
 		}
 
-		for (const section of itinerary) {
+		const dayCount = formData.itineraries.filter(
+			(section) => section.type === "DAY"
+		).length;
+
+		const nightCount = formData.itineraries.filter(
+			(section) => section.type === "NIGHT"
+		).length;
+
+		// Safety check
+		if (dayCount > duration_days) {
+			toast.error(
+				`Maximum ${duration_days} day(s) allowed.`
+			);
+
+			return false;
+		}
+
+		if (nightCount > duration_nights) {
+			toast.error(
+				`Maximum ${duration_nights} night(s) allowed.`
+			);
+
+			return false;
+		}
+
+		for (const section of formData.itineraries) {
+
+			const sectionName =
+				section.type === "DAY"
+					? `Day ${section.day_number} `
+					: `Night ${section.night_number} `;
+
+			// Section title
 			if (!section.title.trim()) {
 				toast.error(
-					`${section.type === "DAY"
-						? "Day"
-						: "Night"
-					} title is required.`
+					`${sectionName} title is required.`
 				);
 
 				return false;
 			}
 
+			// At least one item
 			if (section.items.length === 0) {
 				toast.error(
-					`${section.type === "DAY"
-						? "Day"
-						: "Night"
-					} ${section.type === "DAY"
-						? section.day_number
-						: section.night_number
-					} must contain at least one item.`
+					`${sectionName} must contain at least one item.`
 				);
 
 				return false;
 			}
 
-			for (const item of section.items) {
+			// Check every item
+			for (let i = 0; i < section.items.length; i++) {
+
+				const item = section.items[i];
+
 				if (!item.title.trim()) {
 					toast.error(
-						"Every itinerary item must have a title."
+						`${sectionName}: Item ${i + 1} title is required.`
 					);
 
 					return false;
@@ -353,288 +405,196 @@ export const CreateItinerary = ({
 		return true;
 	};
 
-	// --------------------------------------------------
-	// UPDATE PAYLOAD
-	// --------------------------------------------------
+	// submit function
+	//const handleSubmit = async (e: React.FormEvent) => {
+	//	e.preventDefault();
 
-	const buildUpdatePayload = () => {
-		return {
-			itineraries: itinerary.map((section) => ({
-				...(section.id
-					? {
-						id: section.id,
-					}
-					: {}),
+	//	if (!validateItinerary()) {
+	//		return;
+	//	}
 
-				type: section.type,
+	//	try {
 
-				...(section.type === "DAY"
-					? {
-						day_number: section.day_number,
-					}
-					: {
-						night_number: section.night_number,
-					}),
+	//		await createItineraryMutation(formData)
+	//		setOpenCreate(false);
+	//		toast.success("Itinerary created successfully");
 
-				title: section.title,
+	//	} catch (error) {
+	//		console.error("Create itinerary error:", error);
+	//		toast.error("Something went wrong.");
+	//	}
+	//};
+	const handleSubmit = async (
+		e: React.FormEvent
+	) => {
+		e.preventDefault();
 
-				description:
-					section.description ?? "",
-
-				items: section.items.map((item) => ({
-					...(item.id
-						? {
-							id: item.id,
-						}
-						: {}),
-
-					title: item.title,
-
-					description:
-						item.description ?? "",
-				})),
-			})),
-		};
-	};
-
-	// --------------------------------------------------
-	// CREATE PAYLOAD
-	// --------------------------------------------------
-
-	const buildCreatePayload = () => {
-		return itinerary.map((section) => ({
-			type: section.type,
-
-			...(section.type === "DAY"
-				? {
-					day_number: section.day_number,
-				}
-				: {
-					night_number: section.night_number,
-				}),
-
-			title: section.title,
-
-			description:
-				section.description ?? "",
-
-			items: section.items.map((item) => ({
-				title: item.title,
-
-				description:
-					item.description ?? "",
-			})),
-		}));
-	};
-
-	// --------------------------------------------------
-	// SUBMIT
-	// --------------------------------------------------
-
-	const handleSubmit = async () => {
 		if (!validateItinerary()) {
 			return;
 		}
 
 		try {
-			// ==========================================
-			// UPDATE
-			// ==========================================
 
-			if (isUpdate) {
-				const updateData =
-					buildUpdatePayload();
+			// ---------------- CREATE ----------------
 
-				console.log(
-					"UPDATE PAYLOAD:",
-					updateData
+			if (mode === "CREATE") {
+
+				await createItineraryMutation({
+					trip_id,
+					itineraries: formData.itineraries,
+				});
+				setOpenCreate?.(false);
+
+				toast.success(
+					"Itinerary created successfully"
 				);
+
+			}
+
+			// ---------------- UPDATE ----------------
+			else {
+				const updateData = {
+					itineraries: formData.itineraries.map((section) => {
+						const base = {
+							id: section.id,
+							type: section.type,
+							title: section.title,
+							description: section.description,
+							items: section.items.map((item) => ({
+								id: item.id,
+								title: item.title,
+								description: item.description,
+							})),
+						};
+
+						if (section.type === "DAY") {
+							return {
+								...base,
+								day_number: section.day_number,
+							};
+						}
+
+						return {
+							...base,
+							night_number: section.night_number,
+						};
+					}),
+				};
 
 				await updateItineraryMutation({
 					trip_id,
-					updateData,
+					updateData
 				});
+				setOpenUpdate?.(false);
 
 				toast.success(
 					"Itinerary updated successfully"
 				);
 			}
 
-			// ==========================================
-			// CREATE
-			// ==========================================
 
-			else {
-				const createData =
-					buildCreatePayload();
+		} catch (error) {
 
-				console.log(
-					"CREATE PAYLOAD:",
-					createData
-				);
-
-				await createItineraryMutation({
-					trip_id,
-					itineraries: createData,
-				});
-
-				toast.success(
-					"Itinerary created successfully"
-				);
-			}
-
-			// ==========================================
-			// AFTER SUCCESS
-			// ==========================================
-
-			setOpenCreate(false);
-
-			navigate(
-				`/itinerary/${agency_id}/${agency_name}/${trip_id}/${trip_name}`
-			);
-
-			resetForm();
-
-		} catch (error: any) {
 			console.error(
-				"Itinerary submit error:",
+				"Itinerary operation error:",
 				error
 			);
 
 			toast.error(
-				error?.response?.data?.message ||
-				error?.message ||
-				`Failed to ${isUpdate
-					? "update"
-					: "create"
-				} itinerary`
+				mode === "CREATE"
+					? "Error while creating itinerary"
+					: "Error while updating itinerary"
 			);
 		}
 	};
 
-	// --------------------------------------------------
-	// CLOSE
-	// --------------------------------------------------
-
-	const handleClose = () => {
-		resetForm();
-	};
-
-	// --------------------------------------------------
-	// UI
-	// --------------------------------------------------
-
-	if (!openCreate) {
-		return null;
-	}
-
 	return (
-		<div className="container py-4">
+		<form onSubmit={handleSubmit} className="flex flex-col gap-6 p-5">
 
-			{/* ========================================
-                HEADER
-            ======================================== */}
-
-			<div className="d-flex justify-content-between align-items-center mb-4">
-
-				<div>
-					<h2 className="mb-1">
-						{isUpdate
-							? "Update Itinerary"
-							: "Create Itinerary"}
-					</h2>
-
-					<p className="text-muted mb-0">
-						{isUpdate
-							? "Update your trip itinerary."
-							: "Plan your trip by adding days, nights and activities."}
-					</p>
-				</div>
-
-				<button
+			{/* ADD DAY / NIGHT */}
+			<div className="flex gap-3">
+				<Button
 					type="button"
-					className="btn btn-outline-secondary"
-					onClick={handleClose}
-					disabled={isPending}
+					variant="outline"
+					onClick={addDay}
+					disabled={
+						formData.itineraries.filter(
+							(section) =>
+								section.type === "DAY"
+						).length >= duration_days
+					}
 				>
-					Cancel
-				</button>
-
+					<Plus />
+					Add Day
+				</Button>
+				<Button
+					type="button"
+					variant="outline"
+					onClick={addNight}
+					disabled={
+						formData.itineraries.filter(
+							(section) =>
+								section.type === "NIGHT"
+						).length >= duration_nights
+					}
+				>
+					<Plus />
+					Add Night
+				</Button>
 			</div>
 
-			{/* ========================================
-                ITINERARY SECTIONS
-            ======================================== */}
+			{/* SECTIONS */}
+			{formData.itineraries.map(
+				(section, sectionIndex) => {
 
-			{itinerary.map((section, sectionIndex) => {
+					const isDay =
+						section.type === "DAY";
 
-				const isDay =
-					section.type === "DAY";
+					const number = isDay
+						? section.day_number
+						: section.night_number;
 
-				return (
-					<div
-						key={
-							section.id ??
-							`${section.type}-${sectionIndex}`
-						}
-						className="card mb-4 shadow-sm"
-					>
+					return (
+						<div
+							key={`${section.type} -${number} `}
+							className="border rounded-lg p-4 space-y-5"
+						>
 
-						{/* SECTION HEADER */}
+							{/* SECTION HEADER */}
 
-						<div className="card-header d-flex justify-content-between align-items-center">
+							<div className="flex items-center justify-between">
 
-							<div>
-								<strong>
+								<h2 className="text-lg font-semibold">
 									{isDay
-										? `Day ${section.day_number}`
-										: `Night ${section.night_number}`}
-								</strong>
+										? `Day ${number} `
+										: `Night ${number} `}
+								</h2>
+
+								<Button
+									type="button"
+									variant="destructive"
+									size="icon"
+									onClick={() =>
+										removeSection(
+											sectionIndex
+										)
+									}
+								>
+									<Trash2 />
+								</Button>
+
 							</div>
 
-							<button
-								type="button"
-								className="btn btn-sm btn-outline-danger"
-								onClick={() =>
-									removeSection(
-										sectionIndex
-									)
-								}
-								disabled={
-									isPending ||
-									itinerary.length === 1
-								}
-							>
-								Remove
-							</button>
+							{/* SECTION TITLE */}
 
-						</div>
+							<div className="space-y-2">
 
-						{/* SECTION BODY */}
-
-						<div className="card-body">
-
-							{/* TITLE */}
-
-							<div className="mb-3">
-
-								<label className="form-label">
-									{isDay
-										? "Day Title"
-										: "Night Title"}
+								<label className="text-sm font-medium">
+									Title
 								</label>
 
-								<input
-									type="text"
-									className="form-control"
-									placeholder={
-										isDay
-											? "Enter day title"
-											: "Enter night title"
-									}
-									value={
-										section.title
-									}
+								<Input
+									value={section.title}
 									onChange={(e) =>
 										handleSectionChange(
 											sectionIndex,
@@ -645,95 +605,89 @@ export const CreateItinerary = ({
 											}
 										)
 									}
-									disabled={isPending}
+									placeholder={
+										isDay
+											? `Day ${number} title`
+											: `Night ${number} title`
+									}
 								/>
 
 							</div>
 
-							{/* DESCRIPTION */}
+							{/* SECTION DESCRIPTION */}
 
-							<div className="mb-4">
+							<div className="space-y-2">
 
-								<label className="form-label">
+								<label className="text-sm font-medium">
 									Description
 								</label>
 
-								<textarea
-									className="form-control"
-									rows={3}
-									placeholder="Enter description"
+								<Textarea
 									value={
-										section.description ??
-										""
+										section.description
 									}
 									onChange={(e) =>
 										handleSectionChange(
 											sectionIndex,
 											{
 												description:
-													e.target
+													e
+														.target
 														.value,
 											}
 										)
 									}
-									disabled={isPending}
+									placeholder="Description..."
 								/>
 
 							</div>
 
 							{/* ITEMS */}
 
-							<div>
+							<div className="space-y-4">
 
-								<div className="d-flex justify-content-between align-items-center mb-3">
+								<div className="flex items-center justify-between">
 
-									<h5 className="mb-0">
-										Activities
-									</h5>
+									<h3 className="font-medium">
+										Itinerary Items
+									</h3>
 
-									<button
+									<Button
 										type="button"
-										className="btn btn-sm btn-outline-primary"
+										variant="outline"
+										size="sm"
 										onClick={() =>
 											addItem(
 												sectionIndex
 											)
 										}
-										disabled={
-											isPending
-										}
 									>
-										+ Add Activity
-									</button>
+										<Plus />
+										Add Item
+									</Button>
 
 								</div>
 
 								{section.items.map(
-									(
-										item,
-										itemIndex
-									) => (
+									(item, itemIndex) => (
+
 										<div
-											key={
-												item.id ??
-												`${sectionIndex}-${itemIndex}`
-											}
-											className="border rounded p-3 mb-3"
+											key={itemIndex}
+											className="border rounded-md p-4 space-y-3"
 										>
 
-											{/* ITEM HEADER */}
+											<div className="flex items-center justify-between">
 
-											<div className="d-flex justify-content-between align-items-center mb-3">
-
-												<strong>
-													Activity{" "}
+												<span className="text-sm font-medium">
+													Item{" "}
 													{itemIndex +
 														1}
-												</strong>
+												</span>
 
-												<button
+												<Button
 													type="button"
-													className="btn btn-sm btn-outline-danger"
+													variant="ghost"
+													size="icon"
 													onClick={() =>
 														removeItem(
 															sectionIndex,
@@ -741,157 +695,88 @@ export const CreateItinerary = ({
 														)
 													}
 													disabled={
-														isPending ||
 														section
 															.items
 															.length ===
 														1
 													}
 												>
-													Remove
-												</button>
+													<Trash2 />
+												</Button>
 
 											</div>
 
-											{/* ITEM TITLE */}
-
-											<div className="mb-3">
-
-												<label className="form-label">
-													Activity Title
-												</label>
-
-												<input
-													type="text"
-													className="form-control"
-													placeholder="Enter activity title"
-													value={
-														item.title
-													}
-													onChange={(
+											<Input
+												value={
+													item.title
+												}
+												onChange={(
+													e
+												) =>
+													handleItemChange(
+														sectionIndex,
+														itemIndex,
+														"title",
 														e
-													) =>
-														handleItemChange(
-															sectionIndex,
-															itemIndex,
-															"title",
-															e
-																.target
-																.value
-														)
-													}
-													disabled={
-														isPending
-													}
-												/>
+															.target
+															.value
+													)
+												}
+												placeholder="Item title"
+											/>
 
-											</div>
-
-											{/* ITEM DESCRIPTION */}
-
-											<div>
-
-												<label className="form-label">
-													Activity Description
-												</label>
-
-												<textarea
-													className="form-control"
-													rows={2}
-													placeholder="Enter activity description"
-													value={
-														item.description ??
-														""
-													}
-													onChange={(
+											<Textarea
+												value={
+													item.description
+												}
+												onChange={(
+													e
+												) =>
+													handleItemChange(
+														sectionIndex,
+														itemIndex,
+														"description",
 														e
-													) =>
-														handleItemChange(
-															sectionIndex,
-															itemIndex,
-															"description",
-															e
-																.target
-																.value
-														)
-													}
-													disabled={
-														isPending
-													}
-												/>
-
-											</div>
+															.target
+															.value
+													)
+												}
+												placeholder="Item description..."
+											/>
 
 										</div>
+
 									)
 								)}
 
 							</div>
 
 						</div>
+					);
+				}
+			)}
 
-					</div>
-				);
-			})}
+			{/* SUBMIT */}
+			<Button
+				type="submit"
+				disabled={isCreating || isUpdating}
+			>
+				{isCreating || isUpdating ? (
+					<>
+						<Spinner />
+						{mode === "CREATE"
+							? "Creating..."
+							: "Updating..."}
+					</>
+				) : (
+					<>
+						{mode === "CREATE"
+							? "Create Itinerary"
+							: "Update Itinerary"}
+					</>
+				)}
+			</Button>
 
-			{/* ========================================
-                ADD DAY / NIGHT
-            ======================================== */}
-
-			<div className="d-flex gap-2 mb-4">
-
-				<button
-					type="button"
-					className="btn btn-outline-primary"
-					onClick={addDay}
-					disabled={isPending}
-				>
-					+ Add Day
-				</button>
-
-				<button
-					type="button"
-					className="btn btn-outline-primary"
-					onClick={addNight}
-					disabled={isPending}
-				>
-					+ Add Night
-				</button>
-
-			</div>
-
-			{/* ========================================
-                SUBMIT
-            ======================================== */}
-
-			<div className="d-flex justify-content-end gap-2">
-
-				<button
-					type="button"
-					className="btn btn-secondary"
-					onClick={handleClose}
-					disabled={isPending}
-				>
-					Cancel
-				</button>
-
-				<button
-					type="button"
-					className="btn btn-primary"
-					onClick={handleSubmit}
-					disabled={isPending}
-				>
-					{isPending
-						? isUpdate
-							? "Updating..."
-							: "Creating..."
-						: isUpdate
-							? "Update Itinerary"
-							: "Create Itinerary"}
-				</button>
-
-			</div>
-
-		</div>
+		</form>
 	);
 };

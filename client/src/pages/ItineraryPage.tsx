@@ -1,156 +1,135 @@
-import toast from "react-hot-toast";
-import { Link, useParams } from "react-router-dom"
-import { useGetItinerary } from "../api/itinerary/itinerary-mutation";
-import { Card } from "../components/ui/card";
+import { useDeleteItinerary, useGetItinerary } from "../api/itinerary/itinerary-mutation";
+import { Card } from "../components/ui/card"
 import { useSelector } from "react-redux";
 import type { RootState } from "../app/store";
+import { Link, useParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
-import { Plus, SquarePen } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, Plus, SquarePen, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../components/ui/alert-dialog";
+import { Spinner } from "../components/ui/spinner";
+import toast from "react-hot-toast";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../components/ui/breadcrumb";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
-import { CreateItinerary } from "../components/itinerary/CreateItinerary";
+import { useState } from "react";
 import { ViewItinerary } from "../components/itinerary/ViewItinerary";
 import { useGetTrip } from "../api/trips/trips-mutation";
-import type { ItineraryValidation } from "../interfaces/itinerary.interface";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
+import { CreateItinerary } from "../components/itinerary/CreateItinerary";
 
 export const ItineraryPage = () => {
+
+	// -------- STATEs --------
+	// update state - selectedItinerary
+	const [openCreate, setOpenCreate] = useState<boolean>(false)
+	const [openUpdate, setOpenUpdate] = useState<boolean>(false)
+	//const [selectedItineray, setSelectedItinerary] = useState<UpdateItineraryInterface>()
+
 	const user = useSelector((state: RootState) => state.auth.user);
 
-	const [openCreate, setOpenCreate] = useState<boolean>(false);
-	const [openEdit, setOpenEdit] = useState<boolean>(false);
-	const [selectedItinerary, setSelectedItinerary] = useState<ItineraryValidation[] | null>(null);
+	const { agency_id, agency_name, trip_id, trip_name } = useParams();
 
-	const { agency_id, agency_name, trip_id } = useParams();
-
-	// Hooks must run unconditionally, every render — even if params are missing.
-	// react-query hooks handle `undefined` fine via `enabled` (see note below).
-	const { data, isLoading, error } = useGetItinerary({
+	// -------- APIs --------
+	// get api - itinerary
+	const { data: itineraryData, isLoading: itineraryLoading, error: itineraryError } = useGetItinerary({
 		trip_id: trip_id as string,
 	});
 
+	// get api - trip
 	const { data: tripData, isLoading: tripLoading, error: tripError } = useGetTrip({
-		trip_id: trip_id as string,
-	});
+		trip_id: trip_id as string
+	})
 
-	// Side effects (like toasts) belong in an effect, not directly in the render body.
-	useEffect(() => {
-		if (!agency_id || !agency_name || !trip_id) {
-			toast.error("Missing parameter - agency_id, agency_name or trip_id");
+	// delete api
+	const { mutateAsync: deleteItineraryMutation, isPending: isPendingD } = useDeleteItinerary()
+
+	// delete itinerary logic function
+	const handleDeleteItinerary = async () => {
+		try {
+			if (!trip_id) {
+				toast.error("Trip id not selected")
+				return
+			}
+
+			await deleteItineraryMutation(trip_id)
+			//resetForm()
+			toast.success("Itinerary deleted successfully")
+
+		} catch (error: any) {
+			console.error("Error while deleting itinerary : ", error)
+			toast.error("Error while deleting itinerary : ", error)
 		}
-	}, [agency_id, agency_name, trip_id]);
-
-	if (!agency_id || !agency_name || !trip_id) {
-		return (
-			<div className="flex h-[70vh] items-center justify-center">
-				Something went wrong.
-			</div>
-		);
 	}
 
-	if (isLoading || tripLoading) {
-		return (
-			<div className="flex h-[70vh] items-center justify-center">
-				Loading...
-			</div>
-		);
-	}
 
-	if (error || tripError) {
-		return (
-			<div className="flex h-[70vh] items-center justify-center">
-				Something went wrong.
-			</div>
-		);
-	}
-
-	const itinerary = data?.data;
-	const trip = tripData?.data?.[0];
-
-	const numberOfDays = trip?.duration_days || 0;
-	const numberOfNights = trip?.duration_nights || 0;
-
-	// Call this wherever you trigger "edit" (e.g. a row's Edit button in ViewItinerary,
-	// or the header "Update Trip" button once an itinerary already exists)
-	const handleEditClick = (itineraries: ItineraryValidation[]) => {
-		setSelectedItinerary(itineraries);
-		setOpenEdit(true);
-	};
-
-	// Shared sheets — rendered once, used by both the empty-state and main views
-	const itinerarySheets = (
-		<>
-			{/* CREATE TRIP SHEET */}
-			<Sheet open={openCreate} onOpenChange={setOpenCreate}>
-				<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
-					<SheetHeader>
-						<SheetTitle>Create trip</SheetTitle>
-					</SheetHeader>
-					<CreateItinerary
-						agency_id={agency_id}
-						agency_name={agency_name}
-						trip_id={trip_id}
-						openCreate={openCreate}
-						setOpenCreate={setOpenCreate}
-						numberOfDays={numberOfDays}
-						numberOfNights={numberOfNights}
-					/>
-				</SheetContent>
-			</Sheet>
-
-			{/* EDIT TRIP SHEET */}
-			<Sheet open={openEdit} onOpenChange={setOpenEdit}>
-				<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
-					<SheetHeader>
-						<SheetTitle>Edit trip</SheetTitle>
-					</SheetHeader>
-					{selectedItinerary && (
-						<CreateItinerary
-							agency_id={agency_id}
-							agency_name={agency_name}
-							trip_id={trip_id}
-							openCreate={openEdit}
-							setOpenCreate={setOpenEdit}
-							numberOfDays={numberOfDays}
-							numberOfNights={numberOfNights}
-							isUpdate
-							existingItinerary={selectedItinerary}
-						/>
-					)}
-				</SheetContent>
-			</Sheet>
-		</>
-	);
-
-	if (!itinerary?.length) {
+	// if data is being loaded
+	if (tripLoading || itineraryLoading) {
 		return (
 			<div className="w-full h-100 flex items-center justify-center px-5">
-				<Card className="w-120 px-5">
-					<h1 className="text-center">Not planned any itinerary yet</h1>
-					{user?.role === "AGENCY_USER" ? (
-						<div className="flex items-center justify-center w-full">
-							<Button
-								className="cursor-pointer"
-								variant="outline"
-								onClick={() => setOpenCreate(true)}
-							>
-								<Plus />Plan an Itinerary
-							</Button>
-						</div>
-					) : (
-						<div className="text-center">No itineraries made yet. We'll keep you updated.</div>
-					)}
+				<Card className="px-5">
+					Loading....
 				</Card>
-
-				{itinerarySheets}
 			</div>
-		);
+		)
 	}
 
+	// if there are any errors while fetching the data
+	if (tripError || itineraryError) {
+		return (
+			<div className="w-full h-100 flex items-center justify-center px-5">
+				<Card className="px-5">
+					Error while fetching data
+				</Card>
+			</div>
+		)
+	}
+
+	// if data is not there - show create component - differentiate it with respect to the role
+	if (!itineraryData.data.length) {
+		return (
+			<div className="w-full h-100 flex items-center justify-center px-5">
+				{user?.role === "AGENCY_USER" ? (
+					<>
+						<Card className="px-5">
+							<h1>Itinerary is not created for this trip.</h1>
+							<Button
+								variant="default"
+								onClick={() => setOpenCreate(true)}
+							>
+								<Plus /> Create Itinerary
+							</Button>
+						</Card>
+
+						<Sheet open={openCreate} onOpenChange={setOpenCreate}>
+							<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
+								<SheetHeader>
+									<SheetTitle>Create Iitnerary</SheetTitle>
+								</SheetHeader>
+								<CreateItinerary
+									trip_id={tripData.data[0].id}
+									setOpenCreate={setOpenCreate}
+									duration_days={tripData.data[0].duration_days}
+									duration_nights={tripData.data[0].duration_nights}
+									mode="CREATE"
+								/>
+							</SheetContent>
+						</Sheet>
+					</>
+				) : (
+					<Card className="px-5">
+						<h1>Itinerary is not created for this trip. Please recheck after sometime.</h1>
+					</Card >
+				)}
+			</div >
+		)
+	}
+
+	// if data is there - show the fetched data, show update button, show delete button
 	return (
-		<div className="mt-5">
-			<div className="flex items-center justify-between">
-				<Breadcrumb className="md:mx-40">
+		<div className="w-full flex flex-col gap-5 items-center p-5">
+
+			<div className="flex justify-between w-[80%]">
+
+				<Breadcrumb className="">
+					{/*<Breadcrumb className="md:mx-40">*/}
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
@@ -182,29 +161,88 @@ export const ItineraryPage = () => {
 					</BreadcrumbList>
 				</Breadcrumb>
 
-				{/* We only reach this branch once `itinerary` is non-empty, so this is
-				    always an "update" — the create case is handled by the empty-state return above. */}
-				<Button
-					className="mr-35 cursor-pointer"
-					variant="outline"
-					onClick={() => handleEditClick(itinerary)}
-				>
-					<SquarePen />Update Trip
-				</Button>
+				{user?.role === "AGENCY_USER" && (
+					<div className="flex gap-3">
+
+						<Button><Download /> Download</Button>
+
+						<Button onClick={() => setOpenUpdate(true)}><SquarePen /> Update</Button>
+						<Sheet open={openUpdate} onOpenChange={setOpenUpdate}>
+							<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
+								<SheetHeader>
+									<SheetTitle>Update Itinerary</SheetTitle>
+								</SheetHeader>
+								<CreateItinerary
+									trip_id={tripData.data[0].id}
+									setOpenUpdate={setOpenUpdate}
+									duration_days={tripData.data[0].duration_days}
+									duration_nights={tripData.data[0].duration_nights}
+									mode="UPDATE"
+									initialData={itineraryData.data}
+								/>
+							</SheetContent>
+						</Sheet>
+
+						<AlertDialog>
+							<AlertDialogTrigger asChild>
+								<Button
+									variant="destructive"
+									className="cursor-pointer hover:no-underline"
+								>
+									<Trash2 />Delete Itinerary
+								</Button>
+							</AlertDialogTrigger>
+							<AlertDialogContent>
+								<AlertDialogHeader>
+									<AlertDialogTitle>
+										Are you sure?
+									</AlertDialogTitle>
+
+									<AlertDialogDescription>
+										Itinerary for {trip_name} and all the details related to it will be deleted permanently.
+									</AlertDialogDescription>
+								</AlertDialogHeader>
+
+								<AlertDialogFooter>
+									<AlertDialogCancel
+										variant={undefined}
+										size={undefined}
+										className="cursor-pointer"
+									>
+										Cancel
+									</AlertDialogCancel>
+
+									<AlertDialogAction
+										onClick={handleDeleteItinerary}
+										variant="destructive"
+										size={undefined}
+										className="cursor-pointer"
+									>
+										{
+											isPendingD ? (
+												<><Spinner />Deleting...</>
+											) : (
+												<><Trash2 /> Delete</>
+											)
+										}
+									</AlertDialogAction>
+								</AlertDialogFooter>
+							</AlertDialogContent>
+						</AlertDialog>
+					</div>
+				)}
 			</div>
 
-			<div className="mx-auto max-w-6xl px-4 py-10 flex items-center justify-center gap-5 flex-col">
+			<Card className="px-5">
 				<ViewItinerary
-					data={itinerary}
-					trip={trip}
-					agency_id={agency_id}
-					agency_name={agency_name}
+					data={itineraryData.data}
+					trip={tripData.data[0]}
+					agency_id={agency_id!}
+					agency_name={agency_name!}
 					user={user}
-				//onEdit={handleEditClick}
 				/>
-			</div>
+			</Card>
 
-			{itinerarySheets}
 		</div>
-	);
-};
+	)
+}

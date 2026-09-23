@@ -12,7 +12,6 @@ import { TripsPage } from "../pages/TripsPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import { ItineraryPage } from "../pages/ItineraryPage";
 import { BookTripPage } from "../pages/BookTripPage";
-import { Ip } from "../pages/Ip";
 
 export const router = createBrowserRouter([
 	{
@@ -62,7 +61,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: "/itinerary/:agency_id/:agency_name/:trip_id/:trip_name",
-						element: <Ip />
+						element: <ItineraryPage />
 					}
 					//{
 					//	path: "/itinerary/:agency_id/:agency_name/:trip_id",
