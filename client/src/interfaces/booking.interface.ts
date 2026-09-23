@@ -10,13 +10,15 @@ export interface GetBookingInterface {
 	user_id: string,
 	trip_id: string,
 	reviews: any[],
-	cancellation: any
+	cancellation: any,
+	trip: {
+		title: string,
+		end_date: string
+	}
 }
 
 export interface CretaeBookingInterface {
 	total_amount: number,
-	booking_status: string,
-	payment_status: string,
 	special_request: string,
 	user_id: string,
 	trip_id: string
@@ -29,4 +31,10 @@ export interface UpdateBookingInterface {
 	special_request?: string,
 	user_id?: string,
 	trip_id: string
+}
+
+export interface GetBookingParams {
+	id?: string
+	user_id?: string,
+	trip_id?: string,
 }

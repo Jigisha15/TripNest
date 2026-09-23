@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
 import { prisma } from "../utils/prisma-client";
 import { CreateBookingValidation, UpdateBookingValidation } from "../validations/booking.validation";
+import crypto from "crypto";
+import { razorpay } from "../config/razorpay";
 
 // get
 export const getBooking = async (req: Request, res: Response) => {
@@ -8,7 +10,7 @@ export const getBooking = async (req: Request, res: Response) => {
 
 	try {
 
-		const reviews = await prisma.review.findMany({
+		const bookings = await prisma.booking.findMany({
 			where: {
 				...(trip_id && {
 					trip_id: trip_id as string,
@@ -20,13 +22,21 @@ export const getBooking = async (req: Request, res: Response) => {
 					id: id as string,
 				}),
 			},
+			include: {
+				trip: {
+					select: {
+						title: true,
+						end_date: true
+					}
+				}
+			}
 		});
 
 		// return response
 		return res.status(200).json({
 			success: true,
-			message: reviews.length > 0 ? "Data fetched successfully." : "No bookings exist.",
-			data: reviews
+			message: bookings.length > 0 ? "Data fetched successfully." : "No bookings exist.",
+			data: bookings
 		})
 
 	} catch (error) {
@@ -39,50 +49,61 @@ export const getBooking = async (req: Request, res: Response) => {
 };
 
 // create
-export const createBooking = async (req: Request, res: Response) => {
+export const createBooking = async (
+	req: Request,
+	res: Response
+) => {
 	try {
-		// Validate payload
-		const { error, value } = CreateBookingValidation.validate(req.body, {
-			abortEarly: false,
-		});
+		const { trip_id, user_id, special_request, } = req.body;
 
-		if (error) {
+		// validate required fields
+		if (!trip_id || !user_id) {
 			return res.status(400).json({
 				success: false,
-				message: "Invalid payload",
-				error,
+				message: "trip_id and user_id are required.",
 			});
 		}
 
-		// Check user
-		const existingUser = await prisma.user.findUnique({
-			where: {
-				id: value.user_id,
-			},
-		});
+		// check user
+		const existingUser =
+			await prisma.user.findUnique({
+				where: {
+					id: user_id,
+				},
+				select: {
+					id: true,
+				},
+			});
 
 		if (!existingUser) {
 			return res.status(404).json({
 				success: false,
-				message: "User not found",
+				message: "User not found.",
 			});
 		}
 
-		// Check trip
-		const existingTrip = await prisma.trip.findUnique({
-			where: {
-				id: value.trip_id,
-			},
-		});
+		// check trip
+		const existingTrip =
+			await prisma.trip.findUnique({
+				where: {
+					id: trip_id,
+				},
+				select: {
+					id: true,
+					is_active: true,
+					price: true,
+					available_seats: true
+				},
+			});
 
 		if (!existingTrip) {
 			return res.status(404).json({
 				success: false,
-				message: "Trip not found",
+				message: "Trip not found.",
 			});
 		}
 
-		// Check whether trip is active
+		// check if trip is active or not
 		if (!existingTrip.is_active) {
 			return res.status(400).json({
 				success: false,
@@ -90,85 +111,184 @@ export const createBooking = async (req: Request, res: Response) => {
 			});
 		}
 
-		// Check booking deadline
-		if (new Date() > existingTrip.booking_deadline) {
-			return res.status(400).json({
-				success: false,
-				message: "Booking deadline has passed.",
-			});
-		}
-
-		// Prevent duplicate booking
-		const existingBooking = await prisma.booking.findUnique({
-			where: {
-				user_id_trip_id: {
-					user_id: value.user_id,
-					trip_id: value.trip_id,
-				},
-			},
-		});
-
-		if (existingBooking) {
-			return res.status(409).json({
-				success: false,
-				message: "User already booked this trip.",
-			});
-		}
-
-		// Since one booking represents one person,
-		// every booking requires exactly one seat.
+		// check if trip has available_seats
 		if (existingTrip.available_seats <= 0) {
 			return res.status(400).json({
 				success: false,
-				message: "No seats available for this trip.",
-			});
+				message: "No available seats are there for this trip"
+			})
 		}
 
-		// Use discounted price if applicable
-		const totalAmount =
-			Number(existingTrip.discount_price) > 0
-				? Number(existingTrip.discount_price)
-				: Number(existingTrip.price);
-
-		// Transaction
-		const booking = await prisma.$transaction(async (tx) => {
-			const newBooking = await tx.booking.create({
-				data: {
-					total_amount: totalAmount,
-					booking_status: value.booking_status,
-					payment_status: value.payment_status,
-					special_request: value.special_request,
-					booked_at: new Date(),
-					user_id: value.user_id,
-					trip_id: value.trip_id,
-				},
-			});
-
-			await tx.trip.update({
+		// check duplicate booking
+		const existingBooking =
+			await prisma.booking.findUnique({
 				where: {
-					id: value.trip_id,
-				},
-				data: {
-					available_seats: {
-						decrement: 1,
+					user_id_trip_id: {
+						user_id,
+						trip_id,
 					},
 				},
 			});
 
-			return newBooking;
+		if (existingBooking) {
+			return res.status(409).json({
+				success: false,
+				message:
+					"You already have a booking for this trip.",
+			});
+		}
+
+
+		// fetch amount from db
+		//const totalAmount =
+		//	Number(existingTrip.price);
+
+		//if (!totalAmount || totalAmount <= 0) {
+		//	return res.status(400).json({
+		//		success: false,
+		//		message:
+		//			"Invalid trip amount.",
+		//	});
+		//}
+		const totalAmount = existingTrip.price;
+
+		if (totalAmount.lte(0)) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid trip amount.",
+			});
+		}
+
+		// create booking
+		const booking = await prisma.booking.create({
+			data: {
+				trip_id,
+				user_id,
+				special_request: special_request ?? null,
+				total_amount: totalAmount,
+				booking_status: "PENDING",
+				payment_status: "PENDING",
+			},
 		});
 
+		// decrement available_seats from the trip table
+		await prisma.trip.update({
+			where: { id: trip_id },
+			data: {
+				available_seats: {
+					decrement: 1
+				}
+			}
+		})
+
+		// create razorpay order
+		const razorpayAmount = Math.round(
+			Number(totalAmount) * 100
+		);
+
+		const razorpayOrder = await razorpay.orders.create({
+			amount: razorpayAmount,
+			currency: "INR",
+			receipt: booking.id,
+		});
+
+		// save razorpay order_id
+		await prisma.booking.update({
+			where: {
+				id: booking.id,
+			},
+			data: {
+				razorpay_order_id:
+					razorpayOrder.id,
+			},
+		});
+
+		// response
 		return res.status(201).json({
 			success: true,
-			message: "Booking created successfully.",
-			data: booking,
+			message: "Booking created. Proceed to payment.",
+			data: {
+				booking_id: booking.id,
+				razorpay_order_id: razorpayOrder.id,
+				amount: razorpayOrder.amount,
+				currency: razorpayOrder.currency,
+				razorpay_key: process.env.RAZORPAY_KEY_ID,
+			},
 		});
+
 	} catch (error) {
+
 		console.error("Create booking error:", error);
 
 		return res.status(500).json({
 			success: false,
-			message: "Internal server error",
+			message:
+				"Booking creation failed.",
+		});
+	}
+};
+
+export const verifyBookingPayment = async (
+	req: Request,
+	res: Response
+) => {
+	try {
+
+		const {
+			booking_id,
+			razorpay_order_id,
+			razorpay_payment_id,
+			razorpay_signature,
+		} = req.body;
+
+		const generatedSignature =
+			crypto
+				.createHmac(
+					"sha256",
+					process.env.RAZORPAY_KEY_SECRET!
+				)
+				.update(
+					`${razorpay_order_id}|${razorpay_payment_id}`
+				)
+				.digest("hex");
+
+		if (
+			generatedSignature !==
+			razorpay_signature
+		) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid payment signature.",
+			});
+		}
+
+		const booking =
+			await prisma.booking.update({
+				where: {
+					id: booking_id,
+				},
+				data: {
+					payment_status: "PAID",
+					booking_status: "CONFIRMED",
+				},
+			});
+
+		return res.status(200).json({
+			success: true,
+			message: "Payment verified successfully.",
+			data: booking,
+		});
+
+	} catch (error) {
+
+		console.error(
+			"Payment verification error:",
+			error
+		);
+
+		return res.status(500).json({
+			success: false,
+			message: "Payment verification failed.",
 		});
 	}
 };

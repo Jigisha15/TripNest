@@ -266,7 +266,6 @@ export const updateItinerary = async (
 		const { error, value } = UpdateItineraryValidation.validate(req.body, {
 			abortEarly: false,
 		});
-		console.log("Error : ", error)
 
 		if (error) {
 			return res.status(400).json({
@@ -275,7 +274,6 @@ export const updateItinerary = async (
 				error: error.details,
 			});
 		}
-		console.log("Value : ", value)
 
 		const { itineraries } = value;
 

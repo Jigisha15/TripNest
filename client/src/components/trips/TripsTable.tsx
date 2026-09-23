@@ -97,7 +97,7 @@ export const getColumns = (
 															`,
 														})}
 													>
-														<Plus className="h-4 w-4" />
+														<Plus className="h-4 w-4 text-black" />
 													</Link>
 												</span>
 											</TooltipTrigger>

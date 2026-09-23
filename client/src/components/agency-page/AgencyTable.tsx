@@ -14,7 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { ViewAgencyDetails } from "./ViewAgencyDetails";
 import { ViewAgencyUserDetails } from "./ViewAgencyUserDetails";
 
-export const getColumns = (
+const getColumns = (
 	role: string,
 	setSelectedAgency: Dispatch<SetStateAction<GetAgencyInterface | null>>,
 	setOpen: Dispatch<SetStateAction<boolean>>,

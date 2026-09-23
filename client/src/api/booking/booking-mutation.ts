@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { GetBookingInterface, UpdateBookingInterface } from "../../interfaces/booking.interface";
-import { createBooking, deleteBooking, getBooking, updateBooking } from "./booking";
+import type { GetBookingParams, UpdateBookingInterface } from "../../interfaces/booking.interface";
+import { createBooking, deleteBooking, getBooking, updateBooking, verifyBookingPayment } from "./booking";
 
-export const useGetBooking = (params?: GetBookingInterface) => {
+export const useGetBooking = (params?: GetBookingParams) => {
 	return useQuery({
 		queryKey: ["booking", params],
 		queryFn: () => getBooking(params),
@@ -24,6 +24,14 @@ export const useCreateBooking = () => {
 		}
 	})
 }
+
+// verify payment
+export const useVerifyBookingPayment = () => {
+
+	return useMutation({
+		mutationFn: verifyBookingPayment,
+	});
+};
 
 export const useUpdateBooking = () => {
 	const queryClient = useQueryClient()

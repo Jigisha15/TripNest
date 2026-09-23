@@ -12,6 +12,7 @@ import { TripsPage } from "../pages/TripsPage";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import { ItineraryPage } from "../pages/ItineraryPage";
 import { BookTripPage } from "../pages/BookTripPage";
+import { BookingsPage } from "../pages/Bookings";
 
 export const router = createBrowserRouter([
 	{
@@ -62,11 +63,11 @@ export const router = createBrowserRouter([
 					{
 						path: "/itinerary/:agency_id/:agency_name/:trip_id/:trip_name",
 						element: <ItineraryPage />
+					},
+					{
+						path: "/bookings/:user_id",
+						element: <BookingsPage />
 					}
-					//{
-					//	path: "/itinerary/:agency_id/:agency_name/:trip_id",
-					//	element: <ItineraryPage />
-					//}
 				],
 			},
 			{

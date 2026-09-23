@@ -54,7 +54,7 @@ export const createTrip = async (req: Request, res: Response) => {
 			...value,
 			average_rating: 0,
 			total_reviews: 0,
-			available_seats: 0
+			available_seats: value.total_seats
 		}
 
 		// create trip

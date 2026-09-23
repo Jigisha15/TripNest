@@ -158,6 +158,11 @@ model Booking {
   created_at      DateTime       @default(now()) @map("created_at")
   updated_at      DateTime       @updatedAt @map("updated_at")
 
+  // Razorpay
+  razorpay_order_id   String?    @unique @map("razorpay_order_id")
+  razorpay_payment_id String?    @unique @map("razorpay_payment_id")
+  razorpay_signature  String?    @map("razorpay_signature")
+
   user    User   @relation(fields: [user_id], references: [id])
   user_id String @map("user_id")
 

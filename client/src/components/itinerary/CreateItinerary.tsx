@@ -161,7 +161,6 @@ export const CreateItinerary = ({
 
 	// add day
 	const addDay = () => {
-		console.log("formData : ", duration_days)
 		const currentDays = formData.itineraries.filter(
 			(section) => section.type === "DAY"
 		).length;

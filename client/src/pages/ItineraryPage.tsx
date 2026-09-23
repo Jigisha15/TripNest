@@ -14,6 +14,7 @@ import { ViewItinerary } from "../components/itinerary/ViewItinerary";
 import { useGetTrip } from "../api/trips/trips-mutation";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
 import { CreateItinerary } from "../components/itinerary/CreateItinerary";
+import { exportPDF } from "../lib/exportToPdf";
 
 export const ItineraryPage = () => {
 
@@ -164,7 +165,11 @@ export const ItineraryPage = () => {
 				{user?.role === "AGENCY_USER" && (
 					<div className="flex gap-3">
 
-						<Button><Download /> Download</Button>
+						<Button onClick={() => {
+							exportPDF()
+						}}>
+							<Download /> Download
+						</Button>
 
 						<Button onClick={() => setOpenUpdate(true)}><SquarePen /> Update</Button>
 						<Sheet open={openUpdate} onOpenChange={setOpenUpdate}>

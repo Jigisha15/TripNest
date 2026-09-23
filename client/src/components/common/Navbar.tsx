@@ -74,6 +74,15 @@ export const Navbar = () => {
 									Agency
 								</Link>
 							</div>
+
+							<div className="">
+								<Link
+									to={`/bookings/${user.id}`}
+									className="text-sm font-medium hover:text-blue-600"
+								>
+									Bookings
+								</Link>
+							</div>
 							{/*)}*/}
 
 							<AlertDialog>

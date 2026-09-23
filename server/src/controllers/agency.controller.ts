@@ -147,8 +147,6 @@ export const updateAgency = async (req: Request, res: Response) => {
 			abortEarly: false
 		})
 
-		console.log("value : ", value)
-
 		// if any errors then pass
 		if (error) {
 			return res.status(400).json({
