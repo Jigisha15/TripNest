@@ -10,6 +10,9 @@ import { CarouselImage } from "../components/landing-page/CarouselImage"
 import { FamousTrips } from "../components/landing-page/FamousTrips"
 import { ListedAgencies } from "../components/landing-page/ListedAgencies"
 import { Reviews } from "../components/landing-page/Reviews"
+import { InfoBlock } from "../components/landing-page/InfoBlocks"
+import { PlatformInfoCards } from "../components/landing-page/PlatformInfoCards"
+import { WhyTraveller } from "../components/landing-page/WhyTraveller"
 
 export const LandingPage = () => {
 
@@ -49,17 +52,30 @@ export const LandingPage = () => {
 			{/* landing carousel image */}
 			<CarouselImage />
 
-			{/* upcoming trips */}
+			{/* informative blocks */}
+			<InfoBlock
+				agencies={data.data.agencies}
+				trips={data.data.trips}
+				users={data.data.users}
+			/>
+
+			{/* platform information */}
+			<PlatformInfoCards />
+
+			{/* why Traveller */}
+			<WhyTraveller />
+
+			{/*upcoming trips
 			<UpcomingTripsCard data={data.data.trips} />
 
-			{/* famous trips */}
+			{/* famous trips *
 			<FamousTrips data={data.data.popular_trips} />
 
-			{/* listed agencies */}
+			{/* listed agencies *
 			<ListedAgencies />
 
-			{/* reviews */}
-			<Reviews />
+			{/* reviews *
+			<Reviews />*/}
 
 		</div>
 	)

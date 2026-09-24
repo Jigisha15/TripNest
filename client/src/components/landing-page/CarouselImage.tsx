@@ -1,12 +1,11 @@
 import { useRef } from "react"
 import Autoplay from "embla-carousel-autoplay"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel"
-import { Card, CardContent } from "../ui/card"
+import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel"
 
 const images = [
 	{
 		id: 1,
-		src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ODVFgj0-ngQqEX6zLN-63nXLi08s0P6ZxV2i4kT7jd5QOmqAataYXkWj&s=10",
+		src: "https://plus.unsplash.com/premium_photo-1677002240252-af3f88114efc?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dHJla2tpbmd8ZW58MHx8MHx8fDA%3D",
 	},
 	{
 		id: 2,
@@ -14,7 +13,7 @@ const images = [
 	},
 	{
 		id: 3,
-		src: "https://img.magnific.com/free-photo/couple-family-traveling-together_1150-7772.jpg?semt=ais_hybrid&w=740&q=80",
+		src: "https://static.vecteezy.com/system/resources/thumbnails/010/621/917/small/person-hike-friends-helping-each-other-up-mountain-man-and-woman-giving-helping-hand-and-active-fit-lifestyle-couple-hiking-help-each-other-concept-of-friendship-teamwork-banner-with-copy-space-free-photo.jpg",
 	},
 ]
 

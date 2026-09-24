@@ -162,80 +162,82 @@ export const ItineraryPage = () => {
 					</BreadcrumbList>
 				</Breadcrumb>
 
-				{user?.role === "AGENCY_USER" && (
-					<div className="flex gap-3">
+				{/*{user?.role === "AGENCY_USER" && (*/}
+				<div className="flex gap-3">
 
-						<Button onClick={() => {
-							exportPDF()
-						}}>
-							<Download /> Download
-						</Button>
+					<Button onClick={() => {
+						exportPDF()
+					}}>
+						<Download /> Download
+					</Button>
+					{user?.role === "AGENCY_USER" && (
+						<>
+							<Button onClick={() => setOpenUpdate(true)}><SquarePen /> Update</Button>
+							<Sheet open={openUpdate} onOpenChange={setOpenUpdate}>
+								<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
+									<SheetHeader>
+										<SheetTitle>Update Itinerary</SheetTitle>
+									</SheetHeader>
+									<CreateItinerary
+										trip_id={tripData.data[0].id}
+										setOpenUpdate={setOpenUpdate}
+										duration_days={tripData.data[0].duration_days}
+										duration_nights={tripData.data[0].duration_nights}
+										mode="UPDATE"
+										initialData={itineraryData.data}
+									/>
+								</SheetContent>
+							</Sheet>
 
-						<Button onClick={() => setOpenUpdate(true)}><SquarePen /> Update</Button>
-						<Sheet open={openUpdate} onOpenChange={setOpenUpdate}>
-							<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
-								<SheetHeader>
-									<SheetTitle>Update Itinerary</SheetTitle>
-								</SheetHeader>
-								<CreateItinerary
-									trip_id={tripData.data[0].id}
-									setOpenUpdate={setOpenUpdate}
-									duration_days={tripData.data[0].duration_days}
-									duration_nights={tripData.data[0].duration_nights}
-									mode="UPDATE"
-									initialData={itineraryData.data}
-								/>
-							</SheetContent>
-						</Sheet>
-
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									variant="destructive"
-									className="cursor-pointer hover:no-underline"
-								>
-									<Trash2 />Delete Itinerary
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent>
-								<AlertDialogHeader>
-									<AlertDialogTitle>
-										Are you sure?
-									</AlertDialogTitle>
-
-									<AlertDialogDescription>
-										Itinerary for {trip_name} and all the details related to it will be deleted permanently.
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-
-								<AlertDialogFooter>
-									<AlertDialogCancel
-										variant={undefined}
-										size={undefined}
-										className="cursor-pointer"
-									>
-										Cancel
-									</AlertDialogCancel>
-
-									<AlertDialogAction
-										onClick={handleDeleteItinerary}
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button
 										variant="destructive"
-										size={undefined}
-										className="cursor-pointer"
+										className="cursor-pointer hover:no-underline"
 									>
-										{
-											isPendingD ? (
-												<><Spinner />Deleting...</>
-											) : (
-												<><Trash2 /> Delete</>
-											)
-										}
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
-					</div>
-				)}
+										<Trash2 />Delete Itinerary
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>
+											Are you sure?
+										</AlertDialogTitle>
+
+										<AlertDialogDescription>
+											Itinerary for {trip_name} and all the details related to it will be deleted permanently.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+
+									<AlertDialogFooter>
+										<AlertDialogCancel
+											variant={undefined}
+											size={undefined}
+											className="cursor-pointer"
+										>
+											Cancel
+										</AlertDialogCancel>
+
+										<AlertDialogAction
+											onClick={handleDeleteItinerary}
+											variant="destructive"
+											size={undefined}
+											className="cursor-pointer"
+										>
+											{
+												isPendingD ? (
+													<><Spinner />Deleting...</>
+												) : (
+													<><Trash2 /> Delete</>
+												)
+											}
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+						</>
+					)}
+				</div>
 			</div>
 
 			<Card className="px-5">
