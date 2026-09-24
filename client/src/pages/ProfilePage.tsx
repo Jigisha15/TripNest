@@ -2,7 +2,6 @@ import { useSelector } from "react-redux";
 import { useGetUser } from "../api/user/user-mutation"
 import type { RootState } from "../app/store";
 import { UserData } from "../components/profile-page/UserData";
-import { BookingData } from "../components/profile-page/BookingData";
 import { ReviewData } from "../components/profile-page/ReviewData";
 
 export const ProfilePage = () => {
@@ -43,7 +42,7 @@ export const ProfilePage = () => {
 			{/*  only a user will make bookings - so show these blocks to only him */}
 			{profile.role === "USER" && (
 				<>
-					<BookingData data={profile.booking} />
+					{/*<BookingData data={profile.booking} />*/}
 					<ReviewData data={profile.reviews} />
 				</>
 			)}

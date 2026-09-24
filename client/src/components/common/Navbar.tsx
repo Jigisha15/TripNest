@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 const navItems = [
 	{ name: "Home", href: "/" },
-	{ name: "About Us", href: "/about-us" }
+	{ name: "List Your Agency", href: "/list-your-agency" }
 	//{ name: "Trips", href: "/trips" },
 ];
 
@@ -36,7 +36,7 @@ export const Navbar = () => {
 				{/* Logo */}
 				<Link
 					to="/"
-					className="text-2xl font-bold text-blue-600"
+					className="text-2xl font-bold text-blue-800"
 				>
 					Traveller
 				</Link>

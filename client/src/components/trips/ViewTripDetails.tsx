@@ -131,7 +131,7 @@ export const ViewTripDetails = ({ trip, agency_name, setUpdateFlag, updateFlag, 
 				return;
 			}
 
-			toast.error(error.response?.data?.message || "Registration failed.");
+			toast.error(error.response?.data?.message || "Update failed.");
 		}
 	}
 

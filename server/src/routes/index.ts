@@ -8,6 +8,7 @@ import itineraryRoutes from "./itinerary.route"
 import bookingRoutes from "./booking.route"
 import cancellationRoutes from "./cancellation.route"
 import reviewRoutes from "./review.route"
+import dashboardRoutes from "./dashboard.route"
 
 const router = Router()
 
@@ -20,5 +21,6 @@ router.use("/itinerary", itineraryRoutes)
 router.use("/booking", bookingRoutes)
 router.use("/canellation", cancellationRoutes)
 router.use("/review", reviewRoutes)
+router.use("/dashboard", dashboardRoutes)
 
 export default router

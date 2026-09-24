@@ -4,6 +4,12 @@ import { useSelector } from "react-redux"
 import type { RootState } from "../app/store"
 import { redirect } from "react-router-dom"
 import { UpcomingTripsCard } from "../components/landing-page/UpcomingTripsCard"
+import { useGetDashboard } from "../api/dashboard/dashboard-mutation"
+import { Card } from "../components/ui/card"
+import { CarouselImage } from "../components/landing-page/CarouselImage"
+import { FamousTrips } from "../components/landing-page/FamousTrips"
+import { ListedAgencies } from "../components/landing-page/ListedAgencies"
+import { Reviews } from "../components/landing-page/Reviews"
 
 export const LandingPage = () => {
 
@@ -13,11 +19,48 @@ export const LandingPage = () => {
 		redirect("/auth/login")
 	}
 
+	const { data, isLoading, error } = useGetDashboard()
+
+
+	if (isLoading) {
+		return (
+			<div className="flex h-[70vh] items-center justify-center">
+				<Card className="px-4 py-2">
+					Loading...
+				</Card>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex h-[70vh] items-center justify-center">
+				<Card className="px-4 py-2">
+					Something went wrong.
+				</Card>
+			</div>
+		);
+	}
+
+	console.log("data : ", data.data)
+
 	return (
 		<div className="">
-			<UpcomingTripsCard />
-			{/*<HeroSection />*/}
-			{/*<FeaturesSection />*/}
+			{/* landing carousel image */}
+			<CarouselImage />
+
+			{/* upcoming trips */}
+			<UpcomingTripsCard data={data.data.trips} />
+
+			{/* famous trips */}
+			<FamousTrips data={data.data.popular_trips} />
+
+			{/* listed agencies */}
+			<ListedAgencies />
+
+			{/* reviews */}
+			<Reviews />
+
 		</div>
 	)
 }

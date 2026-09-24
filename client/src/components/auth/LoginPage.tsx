@@ -80,7 +80,7 @@ export const LoginPage = () => {
 				return;
 			}
 
-			toast.error(error.response?.data?.message || "Registration failed.");
+			toast.error(error.response?.data?.message || "Login failed.");
 		}
 	}
 

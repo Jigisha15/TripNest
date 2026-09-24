@@ -1,4 +1,4 @@
-import { LoaderCircle, Save, SquarePen, Trash2, X } from "lucide-react"
+import { Save, SquarePen, Trash2, X } from "lucide-react"
 import type { GetUserInterface, UpdateUserData } from "../../interfaces/user.inteface"
 import { Button } from "../ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
@@ -106,7 +106,7 @@ export const UserData = ({ profile, profileImage }: GetUserDataInterface) => {
 				return;
 			}
 
-			toast.error(error.response?.data?.message || "Registration failed.");
+			toast.error(error.response?.data?.message || "Update failed.");
 		}
 	}
 

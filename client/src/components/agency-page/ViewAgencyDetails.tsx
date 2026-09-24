@@ -117,7 +117,7 @@ export const ViewAgencyDetails = ({ agency, setUpdateFlag, updateFlag, setDelete
 				return;
 			}
 
-			toast.error(error.response?.data?.message || "Registration failed.");
+			toast.error(error.response?.data?.message || "Update failed.");
 		}
 	}
 
