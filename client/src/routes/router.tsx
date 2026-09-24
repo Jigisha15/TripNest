@@ -14,6 +14,7 @@ import { ItineraryPage } from "../pages/ItineraryPage";
 import { BookTripPage } from "../pages/BookTripPage";
 import { BookingsPage } from "../pages/Bookings";
 import { ListYourAgency } from "../pages/ListYourAgency";
+import { ViewAgencyPage } from "../pages/ViewAgencyPage";
 
 export const router = createBrowserRouter([
 	{
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
 					{
 						path: "/agency",
 						element: <AgencyPage />,
+					},
+					{
+						path: "/view-agency/:agency_id",
+						element: <ViewAgencyPage />,
 					},
 					{
 						path: "/trips/:agency_id/:agency_name",

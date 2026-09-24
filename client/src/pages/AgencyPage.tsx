@@ -1,7 +1,5 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../app/store";
-import { AgencyUserData } from "../components/agency-page/AgencyUserData";
-import { AgencyTable } from "../components/agency-page/AgencyTable";
 import type { GetAgencyInterface } from "../interfaces/agency.interface";
 import { useGetAgency } from "../api/agency/agency-mutation";
 import { Button } from "../components/ui/button";
@@ -9,6 +7,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
 import { CreateAgency } from "../components/agency-page/CreateAgency";
+import { Agencies } from "../components/agency-page/Agencies";
 
 export interface AgencyDataInterface {
 	data: GetAgencyInterface[]
@@ -64,13 +63,6 @@ export const AgencyPage = () => {
 
 	return (
 		<div className="mx-auto max-w-6xl px-4 py-10 flex items-center justify-center gap-5 flex-col">
-			{/**
-			 * if the user.role === "AGENCY_USER" && agency === null
-			 * show - no agency alotted and create agency button from which sheet opens
-			 * if exists then show the agency and an update button
-			 *  * if user.role === "ADMIN" OR "USER"
-			 * show a table, a list of all the agencies to the super admin
-			 */}
 			{
 				user?.role === "AGENCY_USER" ? (
 					<>
@@ -85,10 +77,12 @@ export const AgencyPage = () => {
 								<Plus />Create Agency
 							</Button>
 						</div>
-						<AgencyUserData data={agencyData?.data} />
+						{/*<AgencyUserData data={agencyData?.data} />*/}
+						<Agencies data={agencyData.data} />
 					</>
 				) : (
-					<AgencyTable />
+					//<AgencyTable />
+					<Agencies data={agencyData?.data} />
 				)
 			}
 

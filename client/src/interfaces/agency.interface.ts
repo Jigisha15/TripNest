@@ -16,6 +16,11 @@ export interface GetAgencyInterface {
 	created_at: string,
 	updated_at: string,
 	owner_id: string,
+	owner: {
+		first_name: string,
+		last_name: string,
+		email_id: string,
+	}
 }
 
 export interface CreateAgencyInterface {

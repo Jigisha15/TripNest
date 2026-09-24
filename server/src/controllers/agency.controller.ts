@@ -14,6 +14,15 @@ export const getAgency = async (req: Request, res: Response) => {
 				...(agency_id && { id: agency_id as string }),
 				...(user_id && { owner_id: user_id as string }),
 				...(email_id && { email_id: email_id as string }),
+			},
+			include: {
+				owner: {
+					select: {
+						first_name: true,
+						last_name: true,
+						email_id: true,
+					}
+				}
 			}
 		})
 
