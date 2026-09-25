@@ -16,7 +16,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@prisma/client": "6.19.3",
+		"@prisma/client": "6.16.2",
 		"@supabase/server": "^1.2.0",
 		"bcrypt": "^6.0.0",
 		"cloudinary": "^2.10.0",
@@ -27,7 +27,7 @@
 		"multer": "^2.2.0",
 		"pg": "^8.22.0",
 		"postgres": "^3.4.9",
-		"prisma": "6.19.3",
+		"prisma": "6.16.2",
 		"razorpay": "^2.9.8",
 		"zod": "^4.4.3"
 	},
