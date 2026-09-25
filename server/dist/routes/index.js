@@ -1,0 +1,28 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_route_1 = __importDefault(require("./auth.route"));
+const user_route_1 = __importDefault(require("./user.route"));
+const agency_route_1 = __importDefault(require("./agency.route"));
+const trip_route_1 = __importDefault(require("./trip.route"));
+const trip_images_route_1 = __importDefault(require("./trip-images.route"));
+const itinerary_route_1 = __importDefault(require("./itinerary.route"));
+const booking_route_1 = __importDefault(require("./booking.route"));
+const cancellation_route_1 = __importDefault(require("./cancellation.route"));
+const review_route_1 = __importDefault(require("./review.route"));
+const dashboard_route_1 = __importDefault(require("./dashboard.route"));
+const router = (0, express_1.Router)();
+router.use("/auth", auth_route_1.default);
+router.use("/user", user_route_1.default);
+router.use("/agency", agency_route_1.default);
+router.use("/trip", trip_route_1.default);
+router.use("/trip-image", trip_images_route_1.default);
+router.use("/itinerary", itinerary_route_1.default);
+router.use("/booking", booking_route_1.default);
+router.use("/canellation", cancellation_route_1.default);
+router.use("/review", review_route_1.default);
+router.use("/dashboard", dashboard_route_1.default);
+exports.default = router;

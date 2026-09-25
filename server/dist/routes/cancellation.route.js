@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const cancellation_controller_1 = require("../controllers/cancellation.controller");
+const router = (0, express_1.Router)();
+router.get("/get", cancellation_controller_1.getCancellation);
+router.post("/create", cancellation_controller_1.createCancellation);
+router.patch("/update/:cancellation_id", cancellation_controller_1.updateCancellation);
+router.patch("/delete/:cancellation_id", cancellation_controller_1.deleteCancellation);
+exports.default = router;
