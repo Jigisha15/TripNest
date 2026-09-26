@@ -3,13 +3,9 @@ import { useSelector } from "react-redux"
 //import { HeroSection } from "../components/landing-page/HeroSection"
 import type { RootState } from "../app/store"
 import { redirect } from "react-router-dom"
-import { UpcomingTripsCard } from "../components/landing-page/UpcomingTripsCard"
 import { useGetDashboard } from "../api/dashboard/dashboard-mutation"
 import { Card } from "../components/ui/card"
 import { CarouselImage } from "../components/landing-page/CarouselImage"
-import { FamousTrips } from "../components/landing-page/FamousTrips"
-import { ListedAgencies } from "../components/landing-page/ListedAgencies"
-import { Reviews } from "../components/landing-page/Reviews"
 import { InfoBlock } from "../components/landing-page/InfoBlocks"
 import { PlatformInfoCards } from "../components/landing-page/PlatformInfoCards"
 import { WhyTraveller } from "../components/landing-page/WhyTraveller"
@@ -44,8 +40,6 @@ export const LandingPage = () => {
 			</div>
 		);
 	}
-
-	console.log("data : ", data.data)
 
 	return (
 		<div className="">

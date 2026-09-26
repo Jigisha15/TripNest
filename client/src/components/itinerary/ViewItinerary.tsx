@@ -9,12 +9,12 @@ import { useState } from "react";
 interface ViewItineraryPageInterface {
 	data: GetItineraryInterface[],
 	trip: GetTripInterface,
-	agency_id: string,
+	//agency_id: string,
 	agency_name: string,
-	user: any,
+	//user: any,
 }
 
-export const ViewItinerary = ({ data, trip, agency_id, agency_name, user }: ViewItineraryPageInterface) => {
+export const ViewItinerary = ({ data, trip, agency_name }: ViewItineraryPageInterface) => {
 
 	const [isUpdate, setIsUpdate] = useState<boolean>(false)
 

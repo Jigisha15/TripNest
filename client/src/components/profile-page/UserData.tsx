@@ -25,7 +25,7 @@ export const UserData = ({ profile, profileImage }: GetUserDataInterface) => {
 	const user = useSelector((state: RootState) => state.auth.user);
 
 	const [updateFlag, setUpdateFlag] = useState<boolean>(false)
-	const [deleteFlag, setDeleteFlag] = useState<boolean>(false)
+	//const [deleteFlag, setDeleteFlag] = useState<boolean>(false)
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [formData, setFormData] = useState(profile)
@@ -38,9 +38,9 @@ export const UserData = ({ profile, profileImage }: GetUserDataInterface) => {
 		setUpdateFlag(!updateFlag);
 	};
 
-	const handleDeleteFlag = () => {
-		setDeleteFlag(!deleteFlag);
-	};
+	//const handleDeleteFlag = () => {
+	//	setDeleteFlag(!deleteFlag);
+	//};
 
 	const resetForm = () => {
 		setUpdateFlag(false)
@@ -50,7 +50,8 @@ export const UserData = ({ profile, profileImage }: GetUserDataInterface) => {
 	const { mutateAsync: updateUserMutation, isPending: isPendingU } = useUpdateUser()
 
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target;
+		const { name } = e.target;
+		//const { name, value } = e.target;
 
 		setFormData({
 			...formData,

@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react"
+//import { useState, type Dispatch, type SetStateAction } from "react"
 import type { GetItineraryInterface } from "../../../interfaces/itinerary.interface"
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table"
@@ -6,17 +6,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../../ui/sheet"
 
 interface ItineraryTableInterface {
 	data: GetItineraryInterface[],
-	agency_id: string,
-	trip_id: string,
 	user: any,
+	//agency_id: string,
+	//trip_id: string,
 }
 
 export const getColumns = (
-	role: string,
-	//setSelectedTrip: Dispatch<SetStateAction<GetTripInterface | null>>,
-	setOpen: Dispatch<SetStateAction<boolean>>,
-	setUpdateFlag: Dispatch<SetStateAction<boolean>>,
-	setDeleteFlag: Dispatch<SetStateAction<boolean>>,
+	//role: string,
+	////setSelectedTrip: Dispatch<SetStateAction<GetTripInterface | null>>,
+	//setOpen: Dispatch<SetStateAction<boolean>>,
+	//setUpdateFlag: Dispatch<SetStateAction<boolean>>,
+	//setDeleteFlag: Dispatch<SetStateAction<boolean>>,
 ): ColumnDef<GetItineraryInterface>[] => [
 		{
 			accessorKey: "srNo",
@@ -25,14 +25,15 @@ export const getColumns = (
 		},
 	]
 
-export const ItineraryTable = ({ data, agency_id, trip_id, user }: ItineraryTableInterface) => {
+export const ItineraryTable = ({ data }: ItineraryTableInterface) => {
 
-	const [open, setOpen] = useState(false);
-	const [updateFlag, setUpdateFlag] = useState(false);
-	const [deleteFlag, setDeleteFlag] = useState(false);
+	//const [open, setOpen] = useState(false);
+	//const [updateFlag, setUpdateFlag] = useState(false);
+	//const [deleteFlag, setDeleteFlag] = useState(false);
 
 
-	const columns = getColumns(user?.role ?? "", setOpen, setUpdateFlag, setDeleteFlag);
+	//const columns = getColumns(user?.role ?? "", setOpen, setUpdateFlag, setDeleteFlag);
+	const columns = getColumns()
 
 	const table = useReactTable({
 		data: data,
@@ -85,7 +86,8 @@ export const ItineraryTable = ({ data, agency_id, trip_id, user }: ItineraryTabl
 						)}
 					</TableBody>
 
-					<Sheet open={open} onOpenChange={setOpen}>
+					<Sheet>
+						{/*<Sheet open={open} onOpenChange={setOpen}>*/}
 						<SheetContent className="w-full! sm:max-w-xl! lg:max-w-2xl! overflow-y-auto">
 							<SheetHeader>
 								<SheetTitle>Trip Details</SheetTitle>

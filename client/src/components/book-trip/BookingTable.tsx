@@ -5,12 +5,12 @@ import { formatDate } from "../../utils/formateDate"
 import { Badge } from "../ui/badge"
 
 interface BookingTablePageInterface {
-	bookingData: GetBookingInterface,
+	bookingData: GetBookingInterface[],
 	user_id: string
 }
 
 const getColumns = (
-	bookingData: GetBookingInterface
+	//bookingData: GetBookingInterface
 ): ColumnDef<GetBookingInterface>[] => [
 		{
 			id: "srNo",
@@ -124,9 +124,10 @@ const getColumns = (
 		},
 	]
 
-export const BookingTable = ({ bookingData, user_id }: BookingTablePageInterface) => {
+export const BookingTable = ({ bookingData }: BookingTablePageInterface) => {
 
-	const columns = getColumns(bookingData)
+	const columns = getColumns()
+	//const columns = getColumns(bookingData)
 
 	const table = useReactTable({
 		data: bookingData,

@@ -244,9 +244,9 @@ export const ItineraryPage = () => {
 				<ViewItinerary
 					data={itineraryData.data}
 					trip={tripData.data[0]}
-					agency_id={agency_id!}
+					//agency_id={agency_id!}
 					agency_name={agency_name!}
-					user={user}
+				//user={user}
 				/>
 			</Card>
 
