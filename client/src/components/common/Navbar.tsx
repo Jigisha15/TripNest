@@ -154,38 +154,68 @@ export const Navbar = () => {
 							))}
 
 							{user ? (
-								<AlertDialog>
-									<AlertDialogTrigger asChild>
-										<Button
-											variant="link"
-											className="cursor-pointer px-3 hover:text-blue-600 hover:no-underline flex items-start justify-start font-normal"
+								<div className="flex items-center justify-center gap-4">
+									<div className="">
+										<Link
+											to="/profile"
+											className="text-sm font-medium hover:text-blue-600"
 										>
-											Logout
-										</Button>
-									</AlertDialogTrigger>
+											Profile
+										</Link>
+									</div>
 
-									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>
-												Are you sure?
-											</AlertDialogTitle>
+									{/* if the user type is not user then show a create agency page as well */}
+									{/*{user.role !== "USER" && (*/}
+									<div className="">
+										<Link
+											to="/agency"
+											className="text-sm font-medium hover:text-blue-600"
+										>
+											Agency
+										</Link>
+									</div>
 
-											<AlertDialogDescription>
-												You will be logged out of your account.
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-
-										<AlertDialogFooter>
-											<AlertDialogCancel variant={undefined} size={undefined} className="cursor-pointer">
-												Cancel
-											</AlertDialogCancel>
-
-											<AlertDialogAction onClick={handleLogout} variant={undefined} size={undefined} className="cursor-pointer">
+									<div className="">
+										<Link
+											to={`/bookings/${user.id}`}
+											className="text-sm font-medium hover:text-blue-600"
+										>
+											Bookings
+										</Link>
+									</div>
+									<AlertDialog>
+										<AlertDialogTrigger asChild>
+											<Button
+												variant="link"
+												className="cursor-pointer px-3 hover:text-blue-600 hover:no-underline flex items-start justify-start font-normal"
+											>
 												Logout
-											</AlertDialogAction>
-										</AlertDialogFooter>
-									</AlertDialogContent>
-								</AlertDialog>
+											</Button>
+										</AlertDialogTrigger>
+
+										<AlertDialogContent>
+											<AlertDialogHeader>
+												<AlertDialogTitle>
+													Are you sure?
+												</AlertDialogTitle>
+
+												<AlertDialogDescription>
+													You will be logged out of your account.
+												</AlertDialogDescription>
+											</AlertDialogHeader>
+
+											<AlertDialogFooter>
+												<AlertDialogCancel variant={undefined} size={undefined} className="cursor-pointer">
+													Cancel
+												</AlertDialogCancel>
+
+												<AlertDialogAction onClick={handleLogout} variant={undefined} size={undefined} className="cursor-pointer">
+													Logout
+												</AlertDialogAction>
+											</AlertDialogFooter>
+										</AlertDialogContent>
+									</AlertDialog>
+								</div>
 							) : (
 								<Link
 									to="/auth"
