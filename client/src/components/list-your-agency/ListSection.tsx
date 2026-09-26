@@ -60,7 +60,7 @@ export const ListSection = ({ data, user, main_title, top_p, color }: ListSectio
 
 									{!user || user.role === "AGENCY_USER" ? (
 										<Link
-											to={!user ? "/login" : "/agency"}
+											to={!user ? "/auth" : "/agency"}
 											className="bg-blue-100 hover:bg-blue-100 hover:shadow-md font-semibold px-8 py-2 text-black text-lg rounded-sm no-underline hover:no-underline focus:no-underline active:no-underline"
 										>
 											List your Agency
@@ -76,7 +76,7 @@ export const ListSection = ({ data, user, main_title, top_p, color }: ListSectio
 			<div className="w-fit my-8 mx-auto">
 				{!user || user.role === "AGENCY_USER" ? (
 					<Link
-						to={!user ? "/login" : "/agency"}
+						to={!user ? "/auth" : "/agency"}
 						className="bg-blue-100 hover:bg-blue-100 hover:shadow-md font-semibold px-8 py-2 text-black text-lg rounded-sm no-underline hover:no-underline focus:no-underline active:no-underline"
 						style={{ backgroundColor: `${color}` }}
 					>
