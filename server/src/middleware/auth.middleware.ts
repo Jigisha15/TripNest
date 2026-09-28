@@ -38,7 +38,7 @@ export const authenticate = (
 		req.user = payload;
 
 		next();
-	} catch {
+	} catch (error) {
 		return res.status(401).json({
 			success: false,
 			message: "Invalid or expired token",

@@ -3,27 +3,61 @@ import { api } from "../axios";
 
 // get all booking
 export const getBooking = async (params?: GetBookingParams) => {
+	const token = localStorage.getItem("token");
+
 	const response = await api.get("/booking/get", {
 		params,
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
 	});
 	return response.data;
 };
 
 // create booking
 export const createBooking = async (data: CretaeBookingInterface) => {
-	const response = await api.post("/booking/create", data)
+	const token = localStorage.getItem("token");
+
+	const response = await api.post(
+		"/booking/create",
+		data,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			}
+		},
+	)
 	return response.data
 }
 
 // update booking
 export const updateBooking = async (booking_id: string, data: Partial<UpdateBookingInterface>) => {
-	const response = await api.patch(`/booking/update/${booking_id}`, data)
+	const token = localStorage.getItem("token");
+
+	const response = await api.patch(
+		`/booking/update/${booking_id}`,
+		data,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			}
+		},
+	)
 	return response.data
 }
 
 // delete booking
 export const deleteBooking = async (booking_id: string) => {
-	const response = await api.delete(`/booking/delete/${booking_id}`)
+	const token = localStorage.getItem("token");
+
+	const response = await api.delete(
+		`/booking/delete/${booking_id}`,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			}
+		},
+	)
 	return response.data
 }
 
@@ -36,10 +70,16 @@ export const verifyBookingPayment = async (
 		razorpay_signature: string;
 	}
 ) => {
+	const token = localStorage.getItem("token");
 
 	const response = await api.post(
 		"/booking/verify",
-		data
+		data,
+		{
+			headers: {
+				Authorization: `Bearer ${token}`,
+			}
+		},
 	);
 
 	return response.data;
