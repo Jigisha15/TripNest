@@ -9,6 +9,7 @@ import { useState, type ChangeEvent } from "react"
 import type { RegisterInterface } from "../../interfaces/auth.interface"
 import { useRegister } from "../../api/auth/auth-mutation"
 import toast from "react-hot-toast"
+import { Spinner } from "../ui/spinner"
 
 export const RegisterPage = () => {
 
@@ -255,7 +256,9 @@ export const RegisterPage = () => {
 							disabled={isPending}
 							className="w-fit mx-auto px-6 cursor-pointer"
 						>
-							{isPending ? "Registering..." : "Register"}
+							{isPending ? (
+								<div className="flex items-center justify-center gap-2"><Spinner />Registering...</div>
+							) : "Register"}
 						</Button>
 
 					</CardContent >

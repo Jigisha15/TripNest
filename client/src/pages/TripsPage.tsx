@@ -11,6 +11,7 @@ import { Plus } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet"
 import { CreateTrip } from "../components/trips/CreateTrip"
+import { TableSkeleton } from "../components/skeleton/TableSkeleton"
 
 export const TripsPage = () => {
 
@@ -37,9 +38,7 @@ export const TripsPage = () => {
 
 	if (isLoading) {
 		return (
-			<div className="flex h-[70vh] items-center justify-center">
-				Loading...
-			</div>
+			<TableSkeleton />
 		);
 	}
 
@@ -81,7 +80,7 @@ export const TripsPage = () => {
 		<div className="mt-5">
 
 			<div className="flex items-center justify-between">
-				<Breadcrumb className="md:mx-40">
+				<Breadcrumb className="mx-5 md:mx-40">
 					<BreadcrumbList>
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>

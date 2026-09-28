@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+
 import { verifyToken } from "../utils/jwt";
 
 export const authenticate = (
@@ -23,7 +24,14 @@ export const authenticate = (
 			});
 		}
 
-		const token = authHeader.split(" ")[1];
+		const token = authHeader.substring(7);
+
+		if (!token) {
+			return res.status(401).json({
+				success: false,
+				message: "Token missing",
+			});
+		}
 
 		const payload = verifyToken(token);
 

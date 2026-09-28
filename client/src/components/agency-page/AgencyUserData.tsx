@@ -178,51 +178,60 @@ export const AgencyUserData = (agency: AgencyUserDataInterface) => {
 						key={ad.id}
 						className="overflow-hidden rounded-2xl shadow-lg py-0 w-full"
 					>
-						<CardHeader className="border-b bg-linear-to-r flex gap-4 py-4 items-center justify-end">
+						<CardHeader className="flex flex-wrap items-center justify-end gap-2 border-b bg-linear-to-r py-4 px-3 sm:gap-4 sm:px-5">
 							{editingAgencyId === ad.id ? (
-								<div className="flex gap-4">
+								<div className="flex gap-2 sm:gap-4">
 									<Button
 										className="w-fit cursor-pointer"
 										variant="outline"
 										onClick={() => {
-											//setUpdateFlag(false);
 											setEditingAgencyId("");
 											setSelectedAgency("");
 											setFormData(undefined);
-											setErrors({})
+											setErrors({});
 										}}
 									>
-										<X /> Cancel
+										<X />
+										<span className="hidden sm:inline">Cancel</span>
 									</Button>
+
 									<Button
 										className="w-fit cursor-pointer"
 										variant="outline"
 										onClick={() => {
-											handleUpdateAgency(ad)
+											handleUpdateAgency(ad);
 										}}
 									>
 										{isPendingU ? (
-											<><Spinner />Updating Agency...</>
+											<>
+												<Spinner />
+												<span className="hidden sm:inline">
+													Updating Agency...
+												</span>
+											</>
 										) : (
-											<><Save />Update Agency</>
+											<>
+												<Save />
+												<span className="hidden sm:inline">
+													Update Agency
+												</span>
+											</>
 										)}
 									</Button>
 								</div>
 							) : (
-								<div className="">
-									<Button
-										className="w-fit cursor-pointer"
-										variant="outline"
-										onClick={() => {
-											//setUpdateFlag(true);
-											setEditingAgencyId(ad.id);
-											setSelectedAgency(ad.id);
-											setFormData(ad);
-										}}
-									>
-										<SquarePen /> Edit Agency
-									</Button>
-								</div>
+								<Button
+									className="w-fit cursor-pointer"
+									variant="outline"
+									onClick={() => {
+										setEditingAgencyId(ad.id);
+										setSelectedAgency(ad.id);
+										setFormData(ad);
+									}}
+								>
+									<SquarePen />
+									<span className="hidden sm:inline">Edit Agency</span>
+								</Button>
 							)}
 
 							<AlertDialog>
@@ -236,27 +245,27 @@ export const AgencyUserData = (agency: AgencyUserDataInterface) => {
 											setFormData(ad);
 										}}
 									>
-										<Trash2 />Delete Agency
+										<Trash2 />
+										<span className="hidden sm:inline">Delete Agency</span>
 									</Button>
 								</AlertDialogTrigger>
 
 								{deleteFlag && (
-									<AlertDialogContent>
+									<AlertDialogContent className="w-[calc(100%-2rem)] rounded-lg sm:max-w-lg">
 										<AlertDialogHeader>
 											<AlertDialogTitle>
 												Are you sure?
 											</AlertDialogTitle>
 
 											<AlertDialogDescription>
-												{formData?.name} and all the details related to it will be deleted permanently
+												{formData?.name} and all the details related to it
+												will be deleted permanently
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 
-										<AlertDialogFooter>
+										<AlertDialogFooter className="flex-col gap-2 sm:flex-row">
 											<AlertDialogCancel
-												variant={undefined}
-												size={undefined}
-												className="cursor-pointer"
+												className="w-full cursor-pointer sm:w-auto"
 												onClick={() => setDeleteFlag(false)}
 											>
 												Cancel
@@ -265,16 +274,19 @@ export const AgencyUserData = (agency: AgencyUserDataInterface) => {
 											<AlertDialogAction
 												onClick={handleDeleteAgency}
 												variant="destructive"
-												size={undefined}
-												className="cursor-pointer"
+												className="w-full cursor-pointer sm:w-auto"
 											>
-												{
-													isPendingD ? (
-														<><Spinner />Deleting...</>
-													) : (
-														<><Trash2 /> Delete</>
-													)
-												}
+												{isPendingD ? (
+													<>
+														<Spinner />
+														<span>Deleting...</span>
+													</>
+												) : (
+													<>
+														<Trash2 />
+														<span>Delete</span>
+													</>
+												)}
 											</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
@@ -282,10 +294,11 @@ export const AgencyUserData = (agency: AgencyUserDataInterface) => {
 							</AlertDialog>
 
 							<Link
-								className="w-fit cursor-pointer flex items-center gap-1 border rounded-md px-2 py-1 font-medium"
+								className="flex w-fit cursor-pointer items-center gap-1 rounded-md border px-2 py-1 font-medium"
 								to={`/trips/${ad.id}/${ad.name}`}
 							>
-								<Eye size={19} /> View Trips
+								<Eye size={19} />
+								<span className="hidden sm:inline">View Trips</span>
 							</Link>
 						</CardHeader>
 

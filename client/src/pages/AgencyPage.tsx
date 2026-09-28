@@ -8,6 +8,8 @@ import { Plus } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../components/ui/sheet";
 import { CreateAgency } from "../components/agency-page/CreateAgency";
 import { Agencies } from "../components/agency-page/Agencies";
+import { Card, CardContent } from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
 
 export interface AgencyDataInterface {
 	data: GetAgencyInterface[]
@@ -39,8 +41,36 @@ export const AgencyPage = () => {
 
 	if (loadingState) {
 		return (
-			<div className="flex h-[70vh] items-center justify-center">
-				Loading...
+			<div className="mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row items-center justify-center gap-5">
+				{Array.from({ length: 3 }).map((_, index) => (
+					<Card
+						key={index}
+						className="w-full max-w-sm gap-2 pt-2 px-2 overflow-hidden border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+					>
+						<Skeleton className="h-44 w-full rounded-md" />
+
+						<CardContent className="space-y-2 px-5">
+							<div>
+								<Skeleton className="h-8 w-40" />
+								<Skeleton className="h-8 w-40 mt-1" />
+							</div>
+
+							<div className="space-y-2 text-sm pb-2">
+								<Skeleton className="h-8 w-40" />
+								<Skeleton className="h-8 w-40" />
+							</div>
+
+							<div className="flex items-baseline-last justify-between gap-2 border-t pt-4">
+								<div className="">
+									<Skeleton className="h-8 w-40" />
+									<Skeleton className="h-8 w-40 mt-2" />
+								</div>
+
+								<Skeleton className="h-8 w-40" />
+							</div>
+						</CardContent>
+					</Card>
+				))}
 			</div>
 		);
 	}

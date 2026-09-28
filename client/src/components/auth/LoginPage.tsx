@@ -9,6 +9,7 @@ import { setUser } from "../../features/authSlice";
 import type { LoginInterface } from "../../interfaces/auth.interface";
 import { useLogin } from "../../api/auth/auth-mutation";
 import toast from "react-hot-toast";
+import { Spinner } from "../ui/spinner";
 
 export const LoginPage = () => {
 
@@ -137,7 +138,10 @@ export const LoginPage = () => {
 					disabled={isPending}
 					className="w-fit mx-auto px-6 cursor-pointer"
 				>
-					{isPending ? "Logging In..." : "Log In"}
+					{isPending ? (
+						<div className="flex items-center justify-center gap-2"><Spinner />Logging in...</div>
+					)
+						: "Log In"}
 				</Button>
 
 			</CardContent>

@@ -9,18 +9,19 @@ import bookingRoutes from "./booking.route"
 import cancellationRoutes from "./cancellation.route"
 import reviewRoutes from "./review.route"
 import dashboardRoutes from "./dashboard.route"
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router()
 
 router.use("/auth", authRoutes)
-router.use("/user", userRoutes)
-router.use("/agency", agencyRoutes)
-router.use("/trip", tripRoutes)
-router.use("/trip-image", tripImageRoutes)
-router.use("/itinerary", itineraryRoutes)
-router.use("/booking", bookingRoutes)
-router.use("/canellation", cancellationRoutes)
-router.use("/review", reviewRoutes)
+router.use("/user", authenticate, userRoutes)
+router.use("/agency", authenticate, agencyRoutes)
+router.use("/trip", authenticate, tripRoutes)
+router.use("/trip-image", authenticate, tripImageRoutes)
+router.use("/itinerary", authenticate, itineraryRoutes)
+router.use("/booking", authenticate, bookingRoutes)
+router.use("/canellation", authenticate, cancellationRoutes)
+router.use("/review", authenticate, reviewRoutes)
 router.use("/dashboard", dashboardRoutes)
 
 export default router

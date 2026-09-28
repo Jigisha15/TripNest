@@ -31,6 +31,16 @@ export const LandingPage = () => {
 		);
 	}
 
+	//if (isLoading) {
+	//	return (
+	//		<div className="flex h-[70vh] items-center justify-center">
+	//			<Card className="px-4 py-2">
+	//				Loading...
+	//			</Card>
+	//		</div>
+	//	);
+	//}
+
 	if (error) {
 		return (
 			<div className="flex h-[70vh] items-center justify-center">

@@ -7,6 +7,7 @@ import type { AppDispatch, RootState } from "../../app/store";
 import toast from "react-hot-toast";
 import { logout } from "../../features/authSlice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { useState } from "react";
 
 const navItems = [
 	{ name: "Home", href: "/" },
@@ -15,6 +16,9 @@ const navItems = [
 ];
 
 export const Navbar = () => {
+
+	const [open, setOpen] = useState<boolean>(false)
+
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 
@@ -26,7 +30,7 @@ export const Navbar = () => {
 		localStorage.removeItem("token");
 
 		toast.success("Logged out successfully!");
-
+		setOpen(false)
 		navigate("/auth");
 	};
 
@@ -129,7 +133,7 @@ export const Navbar = () => {
 				</nav>
 
 				{/* Mobile Menu */}
-				<Sheet>
+				<Sheet open={open} onOpenChange={setOpen}>
 					<SheetTrigger asChild>
 						<Button
 							variant="ghost"
@@ -141,12 +145,13 @@ export const Navbar = () => {
 					</SheetTrigger>
 
 					<SheetContent side="right" className="w-72">
-						<div className="mt-8 flex flex-col gap-4">
+						<div className="mt-8 flex flex-col gap-1">
 							{navItems.map((item) => (
 								<SheetClose asChild key={item.name}>
 									<Link
 										to={item.href}
 										className="rounded-md px-3 py-2 hover:bg-muted"
+										onClick={() => setOpen(false)}
 									>
 										{item.name}
 									</Link>
@@ -154,11 +159,12 @@ export const Navbar = () => {
 							))}
 
 							{user ? (
-								<div className="flex items-center justify-center gap-4">
+								<div className="flex flex-col gap-5 mt-2 px-3">
 									<div className="">
 										<Link
 											to="/profile"
-											className="text-sm font-medium hover:text-blue-600"
+											className="text-sm hover:text-blue-600"
+											onClick={() => setOpen(false)}
 										>
 											Profile
 										</Link>
@@ -169,7 +175,8 @@ export const Navbar = () => {
 									<div className="">
 										<Link
 											to="/agency"
-											className="text-sm font-medium hover:text-blue-600"
+											className="text-sm hover:text-blue-600"
+											onClick={() => setOpen(false)}
 										>
 											Agency
 										</Link>
@@ -178,16 +185,19 @@ export const Navbar = () => {
 									<div className="">
 										<Link
 											to={`/bookings/${user.id}`}
-											className="text-sm font-medium hover:text-blue-600"
+											className="text-sm hover:text-blue-600"
+											onClick={() => setOpen(false)}
 										>
 											Bookings
 										</Link>
 									</div>
+
 									<AlertDialog>
 										<AlertDialogTrigger asChild>
 											<Button
 												variant="link"
-												className="cursor-pointer px-3 hover:text-blue-600 hover:no-underline flex items-start justify-start font-normal"
+												className="cursor-pointer p-0 hover:text-blue-600 hover:no-underline flex items-start justify-start font-normal"
+											//onClick={() => setOpen(false)}
 											>
 												Logout
 											</Button>
@@ -205,11 +215,21 @@ export const Navbar = () => {
 											</AlertDialogHeader>
 
 											<AlertDialogFooter>
-												<AlertDialogCancel variant={undefined} size={undefined} className="cursor-pointer">
+												<AlertDialogCancel
+													variant={undefined}
+													size={undefined}
+													className="cursor-pointer"
+													onClick={() => setOpen(false)}
+												>
 													Cancel
 												</AlertDialogCancel>
 
-												<AlertDialogAction onClick={handleLogout} variant={undefined} size={undefined} className="cursor-pointer">
+												<AlertDialogAction
+													onClick={handleLogout}
+													variant={undefined}
+													size={undefined}
+													className="cursor-pointer"
+												>
 													Logout
 												</AlertDialogAction>
 											</AlertDialogFooter>
@@ -220,6 +240,7 @@ export const Navbar = () => {
 								<Link
 									to="/auth"
 									className="text-sm font-normal hover:text-blue-600 px-3"
+									onClick={() => setOpen(false)}
 								>
 									Login
 								</Link>
